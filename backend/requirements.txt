@@ -1,0 +1,32 @@
+# MzeeChakula Backend API Requirements
+# Production-ready dependencies with version constraints
+
+# Core API Framework
+fastapi
+uvicorn[standard]
+pydantic
+python-multipart
+
+# ML Dependencies (inference only)
+numpy
+pandas
+scikit-learn
+xgboost
+joblib
+
+# Hugging Face Integration (for online model)
+huggingface-hub
+
+# HTTP Client & Utilities
+requests
+httpx
+python-dotenv
+
+# Logging and Monitoring
+python-json-logger
+psutil
+prometheus-client
+
+# Development & Testing (optional in production)
+pytest
+pytest-cov
