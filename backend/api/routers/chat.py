@@ -4,7 +4,6 @@ from datetime import datetime
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-import openai
 
 from api.models.chat import ChatRequest, ChatResponse, ChatMessage, ConversationDB, MessageDB
 from api.models.user import UserDB
@@ -17,14 +16,9 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-# Configuration
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "your-groq-api-key")
 
-# Initialize client (using OpenAI compatible client for Groq)
-client = openai.OpenAI(
-    base_url="https://api.groq.com/openai/v1",
-    api_key=GROQ_API_KEY
-)
+
+from api.services.llm_service import llm_service
 
 @router.post("/message", response_model=ChatResponse)
 async def chat_message(
@@ -89,18 +83,8 @@ async def chat_message(
             
         messages.append({"role": "user", "content": request.message})
         
-        # 4. Call Groq API
-        completion = client.chat.completions.create(
-            model="llama3-70b-8192",
-            messages=messages,
-            temperature=0.7,
-            max_tokens=1024,
-            top_p=1,
-            stream=False,
-            stop=None,
-        )
-        
-        response_content = completion.choices[0].message.content
+        # 4. Call Groq API via LLM Service (using LangChain)
+        response_content = await llm_service.generate_response(messages)
         
         # 5. Save Assistant Response
         assistant_msg = MessageDB(

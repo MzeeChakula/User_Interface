@@ -91,6 +91,7 @@ except Exception as e:
 
 from .routers.auth import router as auth_router
 from .routers.chat import router as chat_router
+from .routers.ai import router as ai_router
 
 # Include routers
 app.include_router(health_router)
@@ -98,6 +99,7 @@ app.include_router(predict_router)
 app.include_router(metrics_router)
 app.include_router(auth_router)
 app.include_router(chat_router)
+app.include_router(ai_router)
 
 
 @app.get("/", include_in_schema=False)
