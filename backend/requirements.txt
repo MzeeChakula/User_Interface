@@ -1,32 +1,89 @@
 # MzeeChakula Backend API Requirements
-# Production-ready dependencies with version constraints
+# Production-ready dependencies
 
+# ================================
 # Core API Framework
+# ================================
 fastapi
 uvicorn[standard]
 pydantic
+pydantic-settings
 python-multipart
 
+# ================================
+# Authentication & Security
+# ================================
+PyJWT
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt
+email-validator
+
+# ================================
+# Database
+# ================================
+# PostgreSQL
+sqlalchemy
+asyncpg
+alembic
+supabase
+
+# Redis (optional)
+redis
+hiredis
+
+# ================================
 # ML Dependencies (inference only)
+# ================================
 numpy
 pandas
 scikit-learn
 xgboost
 joblib
 
-# Hugging Face Integration (for online model)
+# ================================
+# AI Services
+# ================================
+# Hugging Face
 huggingface-hub
 
+# LangChain & RAG
+langchain
+langchain-community
+langchain-groq
+langchain-chroma
+chromadb
+tavily-python
+# OR Pinecone (uncomment if using)
+# pinecone-client
+
+# OpenAI-compatible (for Groq)
+openai
+
+# ================================
 # HTTP Client & Utilities
+# ================================
 requests
 httpx
 python-dotenv
+aiofiles
 
+# ================================
+# WebSocket Support
+# ================================
+websockets
+
+# ================================
 # Logging and Monitoring
+# ================================
 python-json-logger
 psutil
 prometheus-client
+sentry-sdk[fastapi]
 
-# Development & Testing (optional in production)
+# ================================
+# Development & Testing
+# ================================
 pytest
 pytest-cov
+pytest-asyncio
