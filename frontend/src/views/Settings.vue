@@ -7,8 +7,11 @@
     </header>
 
     <div class="settings-content">
-      <!-- Language Settings -->
-      <section class="settings-section">
+      <div class="settings-grid">
+        <!-- Left Column -->
+        <div class="settings-column">
+          <!-- Language Settings -->
+          <section class="settings-section">
         <h2 class="section-title">Language Preferences</h2>
         <div class="setting-item">
           <div class="setting-info">
@@ -53,7 +56,7 @@
             </div>
           </div>
           <div class="status-indicator" :class="{ online: isOnline, offline: !isOnline }">
-            {{ isOnline ? '🟢' : '🔴' }}
+            <Circle :size="20" :fill="isOnline ? '#10B981' : '#EF4444'" :stroke="isOnline ? '#10B981' : '#EF4444'" />
           </div>
         </div>
       </section>
@@ -70,17 +73,25 @@
           <span class="info-value">{{ storageUsed }} KB</span>
         </div>
       </section>
+        </div>
 
-      <!-- Help & Support -->
-      <section class="settings-section">
+        <!-- Right Column -->
+        <div class="settings-column">
+          <!-- Help & Support -->
+          <section class="settings-section">
         <h2 class="section-title">Help & Support</h2>
-        <button @click="showFAQ" class="action-btn">
-          <span class="btn-icon">❓</span>
+        <button @click="goToFAQ" class="action-btn">
+          <HelpCircle class="btn-icon" :size="20" />
           <span>FAQ</span>
           <span class="btn-arrow">→</span>
         </button>
-        <button @click="sendFeedback" class="action-btn">
-          <span class="btn-icon">💬</span>
+        <button @click="goToContact" class="action-btn">
+          <Phone class="btn-icon" :size="20" />
+          <span>Contact Us</span>
+          <span class="btn-arrow">→</span>
+        </button>
+        <button @click="goToFeedback" class="action-btn">
+          <MessageCircle class="btn-icon" :size="20" />
           <span>Send Feedback</span>
           <span class="btn-arrow">→</span>
         </button>
@@ -90,11 +101,11 @@
       <section class="settings-section">
         <h2 class="section-title">Account</h2>
         <button @click="logout" class="action-btn danger">
-          <span class="btn-icon">🚪</span>
+          <LogOut class="btn-icon" :size="20" />
           <span>Log Out</span>
         </button>
         <button @click="deleteAccount" class="action-btn danger">
-          <span class="btn-icon">🗑️</span>
+          <Trash2 class="btn-icon" :size="20" />
           <span>Delete Account</span>
         </button>
       </section>
@@ -103,31 +114,71 @@
       <section class="settings-section">
         <h2 class="section-title">Data Management</h2>
         <button @click="clearCache" class="action-btn">
-          <span class="btn-icon">🧹</span>
+          <Eraser class="btn-icon" :size="20" />
           <span>Clear Cache</span>
         </button>
         <button @click="clearConversations" class="action-btn">
-          <span class="btn-icon">💭</span>
+          <MessageSquare class="btn-icon" :size="20" />
           <span>Clear All Conversations</span>
         </button>
       </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Account Confirmation Modal -->
+    <div v-if="showDeleteModal" class="modal-overlay" @click="showDeleteModal = false">
+      <div class="modal-content delete-modal" @click.stop>
+        <div class="modal-header">
+          <Trash2 :size="48" class="modal-icon delete-icon" />
+          <h3>Delete Account</h3>
+        </div>
+        <div class="modal-body">
+          <p><strong>Warning:</strong> This action cannot be undone!</p>
+          <p>All your data, conversations, and settings will be permanently deleted.</p>
+          <div class="confirmation-input">
+            <label for="deleteConfirm">Type <strong>DELETE</strong> to confirm:</label>
+            <input
+              v-model="deleteConfirmText"
+              type="text"
+              id="deleteConfirm"
+              placeholder="DELETE"
+              class="confirm-input"
+            />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button
+            @click="confirmDeleteAccount"
+            class="btn btn-danger"
+            :disabled="deleteConfirmText !== 'DELETE'"
+          >
+            Delete My Account
+          </button>
+          <button @click="closeDeleteModal" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '../stores/app'
 import { useAuthStore } from '../stores/auth'
 import { useChatStore } from '../stores/chat'
 import { useOnlineStatus } from '../composables/useOnlineStatus'
+import { Circle, HelpCircle, MessageCircle, LogOut, Trash2, Eraser, MessageSquare, Phone } from 'lucide-vue-next'
 
 const router = useRouter()
 const appStore = useAppStore()
 const authStore = useAuthStore()
 const chatStore = useChatStore()
 const { isOnline } = useOnlineStatus()
+
+const showDeleteModal = ref(false)
+const deleteConfirmText = ref('')
 
 const storageUsed = computed(() => {
   let size = 0
@@ -147,12 +198,16 @@ const changeLanguage = () => {
   alert('Language change will be implemented with i18n integration.')
 }
 
-const showFAQ = () => {
-  alert('FAQ section will be added in a future update.')
+const goToFAQ = () => {
+  router.push({ name: 'FAQ' })
 }
 
-const sendFeedback = () => {
-  alert('Feedback form will be implemented with backend integration.')
+const goToContact = () => {
+  router.push({ name: 'ContactUs' })
+}
+
+const goToFeedback = () => {
+  router.push({ name: 'SendFeedback' })
 }
 
 const logout = () => {
@@ -163,16 +218,19 @@ const logout = () => {
 }
 
 const deleteAccount = () => {
-  const confirmation = prompt(
-    'This action cannot be undone. Type "DELETE" to confirm account deletion:'
-  )
+  showDeleteModal.value = true
+}
 
-  if (confirmation === 'DELETE') {
-    authStore.logout()
-    localStorage.clear()
-    router.push({ name: 'Auth' })
-    alert('Your account has been deleted.')
-  }
+const confirmDeleteAccount = () => {
+  authStore.logout()
+  localStorage.clear()
+  router.push({ name: 'Auth' })
+  alert('Your account has been deleted.')
+}
+
+const closeDeleteModal = () => {
+  showDeleteModal.value = false
+  deleteConfirmText.value = ''
 }
 
 const clearCache = () => {
@@ -202,12 +260,12 @@ const clearConversations = () => {
 <style scoped>
 .settings-container {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
 .settings-header {
   background: white;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--color-gray-200);
   padding: 1rem 1.5rem;
   display: flex;
   align-items: center;
@@ -219,7 +277,7 @@ const clearConversations = () => {
   border: none;
   font-size: 1rem;
   font-weight: 600;
-  color: #4361ee;
+  color: var(--color-primary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -241,8 +299,17 @@ const clearConversations = () => {
 
 .settings-content {
   padding: 1.5rem;
-  max-width: 800px;
+  max-width: 1400px;
   margin: 0 auto;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.settings-column {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -250,18 +317,28 @@ const clearConversations = () => {
 
 .settings-section {
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(217, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.settings-section:hover {
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
 }
 
 .section-title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #212529;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 1rem 0;
   padding-bottom: 0.75rem;
-  border-bottom: 2px solid #f8f9fa;
+  border-bottom: 2px solid var(--color-gray-100);
 }
 
 .setting-item {
@@ -289,7 +366,7 @@ const clearConversations = () => {
 
 .setting-select {
   padding: 0.5rem 1rem;
-  border: 2px solid #dee2e6;
+  border: 2px solid var(--color-gray-200);
   border-radius: 8px;
   font-size: 0.875rem;
   background: white;
@@ -299,7 +376,7 @@ const clearConversations = () => {
 
 .setting-select:focus {
   outline: none;
-  border-color: #4361ee;
+  border-color: var(--color-primary);
 }
 
 .toggle-switch {
@@ -322,7 +399,7 @@ const clearConversations = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background: linear-gradient(135deg, #ccc 0%, #aaa 100%);
   transition: 0.3s;
   border-radius: 28px;
 }
@@ -340,7 +417,7 @@ const clearConversations = () => {
 }
 
 input:checked + .toggle-slider {
-  background-color: #4361ee;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
 }
 
 input:checked + .toggle-slider:before {
@@ -355,7 +432,7 @@ input:checked + .toggle-slider:before {
   display: flex;
   justify-content: space-between;
   padding: 0.875rem 0;
-  border-bottom: 1px solid #f8f9fa;
+  border-bottom: 1px solid var(--color-gray-50);
 }
 
 .info-item:last-child {
@@ -378,14 +455,15 @@ input:checked + .toggle-slider:before {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem;
-  border: 2px solid #dee2e6;
-  border-radius: 10px;
-  background: white;
+  padding: 1rem 1.25rem;
+  border: 2px solid var(--color-gray-200);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   font-size: 1rem;
   margin-bottom: 0.75rem;
+  font-weight: 500;
 }
 
 .action-btn:last-child {
@@ -393,9 +471,10 @@ input:checked + .toggle-slider:before {
 }
 
 .action-btn:hover {
-  border-color: #4361ee;
-  background: #f8f9fa;
-  transform: translateX(5px);
+  border-color: var(--color-primary);
+  background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
+  transform: translateX(8px);
+  box-shadow: 0 5px 15px rgba(217, 0, 0, 0.1);
 }
 
 .action-btn.danger {
@@ -417,6 +496,132 @@ input:checked + .toggle-slider:before {
   color: #6c757d;
 }
 
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  margin: 1rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.modal-icon {
+  margin-bottom: 1rem;
+}
+
+.delete-icon {
+  color: #dc3545;
+}
+
+.modal-header h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+.modal-body {
+  margin-bottom: 2rem;
+}
+
+.modal-body p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: var(--color-gray-700);
+}
+
+.confirmation-input {
+  margin-top: 1.5rem;
+}
+
+.confirmation-input label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+.confirm-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--color-gray-300);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.confirm-input:focus {
+  outline: none;
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+}
+
+.btn {
+  padding: 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  font-size: 1rem;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+}
+
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: var(--color-gray-200);
+  color: var(--color-gray-700);
+}
+
+.btn-secondary:hover {
+  background: var(--color-gray-300);
+}
+
+@media (max-width: 1024px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
   .settings-content {
     padding: 1rem;
@@ -424,6 +629,24 @@ input:checked + .toggle-slider:before {
 
   .settings-section {
     padding: 1rem;
+  }
+
+  .settings-grid {
+    gap: 1.5rem;
+  }
+
+  .header-title {
+    font-size: 1rem;
+  }
+
+  .setting-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .setting-select {
+    width: 100%;
   }
 }
 </style>

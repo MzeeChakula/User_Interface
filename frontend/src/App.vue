@@ -2,6 +2,7 @@
 import { onMounted } from 'vue'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 import AppLoader from './components/AppLoader.vue'
+import InstallAppPrompt from './components/InstallAppPrompt.vue'
 import { useAppStore } from './stores/app'
 import { useOnlineStatus } from './composables/useOnlineStatus'
 
@@ -26,6 +27,7 @@ onMounted(() => {
   <div id="app">
     <AppLoader v-if="appStore.showLoader" />
     <router-view v-else />
+    <InstallAppPrompt v-if="!appStore.showLoader" />
   </div>
 </template>
 

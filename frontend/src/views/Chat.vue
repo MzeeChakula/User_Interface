@@ -3,13 +3,26 @@
     <!-- Sidebar for chat history -->
     <aside class="sidebar" :class="{ open: sidebarOpen }">
       <div class="sidebar-header">
-        <h2 class="sidebar-title">Chat History</h2>
-        <button @click="toggleSidebar" class="close-btn mobile-only">✕</button>
+        <div class="app-brand">
+          <img src="/icons/logotransparent.svg" alt="Logo" class="brand-icon" />
+          <h2 class="sidebar-title">Mzee Chakula</h2>
+        </div>
+        <button @click="toggleSidebar" class="close-btn mobile-only"><X :size="24" /></button>
       </div>
 
       <button @click="startNewChat" class="new-chat-btn">
-        <span>➕</span> New Chat
+        <Plus :size="20" /> New Chat
       </button>
+
+      <!-- Language Selector -->
+      <div class="language-selector">
+        <Globe :size="18" />
+        <select v-model="selectedLanguage" @change="changeLanguage" class="language-select">
+          <option value="en">English</option>
+          <option value="lg">Luganda</option>
+          <option value="sw">Swahili</option>
+        </select>
+      </div>
 
       <div class="conversations-list">
         <div
@@ -27,28 +40,61 @@
           <p>No conversations yet</p>
         </div>
       </div>
+
+      <!-- Help & Support Section -->
+      <div class="help-section">
+        <button @click="toggleHelpDropdown" class="help-header">
+          <div class="help-header-content">
+            <HelpCircle :size="18" />
+            <span>Help & Support</span>
+          </div>
+          <ChevronDown :size="18" :class="['chevron', { rotated: helpDropdownOpen }]" />
+        </button>
+        <transition name="dropdown">
+          <div v-if="helpDropdownOpen" class="help-links">
+            <router-link to="/faq" class="help-link" @click="sidebarOpen = false">
+              <MessageSquare :size="16" />
+              <span>FAQ</span>
+            </router-link>
+            <router-link to="/contact-us" class="help-link" @click="sidebarOpen = false">
+              <Phone :size="16" />
+              <span>Contact Us</span>
+            </router-link>
+            <router-link to="/send-feedback" class="help-link" @click="sidebarOpen = false">
+              <Send :size="16" />
+              <span>Send Feedback</span>
+            </router-link>
+          </div>
+        </transition>
+      </div>
+
+      <!-- Logout Button -->
+      <button @click="handleLogout" class="logout-btn">
+        <LogOut :size="20" />
+        <span>Logout</span>
+      </button>
     </aside>
 
     <!-- Main chat area -->
     <main class="chat-main">
       <header class="chat-header">
-        <button @click="toggleSidebar" class="menu-btn mobile-only">☰</button>
-        <h1 class="header-title">Mzee Chakula</h1>
+        <button @click="toggleSidebar" class="menu-btn mobile-only"><Menu :size="24" /></button>
+        <h1 class="header-title">Graph-Enhanced LLMs for Locally Sourced Elderly Nutrition Planning in Uganda</h1>
         <div class="header-actions">
-          <router-link to="/profile" class="icon-btn" title="Profile">👤</router-link>
-          <router-link to="/settings" class="icon-btn" title="Settings">⚙️</router-link>
+          <router-link to="/profile" class="icon-btn" title="Profile"><User :size="20" /></router-link>
+          <router-link to="/settings" class="icon-btn" title="Settings"><Settings :size="20" /></router-link>
         </div>
       </header>
 
       <!-- Online/Offline status banner -->
       <div v-if="!isOnline" class="status-banner offline">
-        📡 You're offline. Messages will be sent when you're back online.
+        <WifiOff :size="20" class="inline-icon" /> You're offline. Messages will be sent when you're back online.
       </div>
 
       <!-- Messages area -->
       <div class="messages-container" ref="messagesContainer">
         <div v-if="!chatStore.currentConversation || chatStore.currentConversation.messages.length === 0" class="welcome-section">
-          <div class="welcome-icon">👋</div>
+          <div class="welcome-icon"><Hand :size="64" /></div>
           <h2 class="welcome-title">Welcome to Mzee Chakula</h2>
           <p class="welcome-text">Ask me anything about nutritional planning for elderly care</p>
 
@@ -84,6 +130,10 @@
       <!-- Input area -->
       <div class="input-area">
         <form @submit.prevent="sendMessage" class="input-form">
+          <button type="button" @click="openFileUpload" class="input-action-btn" title="Upload Document">
+            <Upload :size="20" />
+          </button>
+
           <input
             v-model="messageInput"
             type="text"
@@ -91,30 +141,109 @@
             class="message-input"
             :disabled="chatStore.isLoading"
           />
+
+          <button
+            type="button"
+            @click="toggleVoiceInput"
+            class="input-action-btn voice-btn"
+            :class="{ active: isRecording }"
+            title="Voice Input"
+          >
+            <Mic :size="20" v-if="!isRecording" />
+            <MicOff :size="20" v-else />
+          </button>
+
           <button
             type="submit"
             class="send-btn"
             :disabled="!messageInput.trim() || chatStore.isLoading"
           >
-            <span class="send-icon">🚀</span>
+            <Send :size="20" />
           </button>
         </form>
       </div>
     </main>
+
+    <!-- Document Upload Warning Modal -->
+    <div v-if="showUploadWarning" class="modal-overlay" @click="showUploadWarning = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <AlertTriangle :size="48" class="warning-icon" />
+          <h3>Document Upload Warning</h3>
+        </div>
+        <div class="modal-body">
+          <p><strong>Important:</strong> Please do not upload documents containing sensitive personal information such as:</p>
+          <ul>
+            <li>National ID numbers or passports</li>
+            <li>Financial information (bank accounts, credit cards)</li>
+            <li>Private medical records with identifying details</li>
+            <li>Any confidential personal data</li>
+          </ul>
+          <p>We use RAG (Retrieval-Augmented Generation) to process your documents for better recommendations, but we prioritize your privacy and security.</p>
+        </div>
+        <div class="modal-actions">
+          <button @click="proceedWithUpload" class="btn btn-primary">I Understand, Continue</button>
+          <button @click="showUploadWarning = false" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden file input -->
+    <input
+      ref="fileInput"
+      type="file"
+      @change="handleFileUpload"
+      accept=".pdf,.doc,.docx,.txt"
+      style="display: none"
+    />
+
+    <!-- Logout Confirmation Modal -->
+    <div v-if="showLogoutModal" class="modal-overlay" @click="showLogoutModal = false">
+      <div class="modal-content logout-modal" @click.stop>
+        <div class="modal-header">
+          <LogOut :size="48" class="modal-icon logout-icon" />
+          <h3>Confirm Logout</h3>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to log out of your account?</p>
+        </div>
+        <div class="modal-actions">
+          <button @click="confirmLogout" class="btn btn-danger">Yes, Logout</button>
+          <button @click="showLogoutModal = false" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, nextTick, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useChatStore } from '../stores/chat'
+import { useAuthStore } from '../stores/auth'
+import { useAppStore } from '../stores/app'
 import { useOnlineStatus } from '../composables/useOnlineStatus'
+import {
+  X, Plus, Menu, User, Settings, WifiOff, Hand, Send,
+  LogOut, Globe, Upload, Mic, MicOff, AlertTriangle,
+  HelpCircle, MessageSquare, Phone, ChevronDown
+} from 'lucide-vue-next'
 
+const router = useRouter()
 const chatStore = useChatStore()
+const authStore = useAuthStore()
+const appStore = useAppStore()
 const { isOnline } = useOnlineStatus()
 
 const sidebarOpen = ref(false)
 const messageInput = ref('')
 const messagesContainer = ref(null)
+const selectedLanguage = ref(appStore.language)
+const isRecording = ref(false)
+const showUploadWarning = ref(false)
+const fileInput = ref(null)
+const helpDropdownOpen = ref(false)
+const showLogoutModal = ref(false)
 
 const examplePrompts = [
   'Create a weekly plan for diabetes',
@@ -129,6 +258,10 @@ onMounted(() => {
 
 const toggleSidebar = () => {
   sidebarOpen.value = !sidebarOpen.value
+}
+
+const toggleHelpDropdown = () => {
+  helpDropdownOpen.value = !helpDropdownOpen.value
 }
 
 const startNewChat = () => {
@@ -200,37 +333,97 @@ const formatDate = (dateString) => {
 const formatTime = (dateString) => {
   return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
+
+const changeLanguage = () => {
+  appStore.setLanguage(selectedLanguage.value)
+  // TODO: Implement actual language change with i18n
+  alert(`Language changed to: ${selectedLanguage.value}. Full translation coming soon!`)
+}
+
+const handleLogout = () => {
+  showLogoutModal.value = true
+}
+
+const confirmLogout = () => {
+  authStore.logout()
+  router.push({ name: 'Auth' })
+}
+
+const toggleVoiceInput = () => {
+  if (!isRecording.value) {
+    // Start recording
+    isRecording.value = true
+    // TODO: Implement actual voice recording
+    alert('Voice input will be implemented with speech recognition API')
+    setTimeout(() => {
+      isRecording.value = false
+    }, 3000)
+  } else {
+    // Stop recording
+    isRecording.value = false
+  }
+}
+
+const openFileUpload = () => {
+  showUploadWarning.value = true
+}
+
+const proceedWithUpload = () => {
+  showUploadWarning.value = false
+  fileInput.value?.click()
+}
+
+const handleFileUpload = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    // TODO: Implement actual file upload and RAG processing
+    alert(`File "${file.name}" will be processed with RAG for better recommendations.`)
+    // Reset file input
+    event.target.value = ''
+  }
+}
 </script>
 
 <style scoped>
 .chat-container {
   display: flex;
   height: 100vh;
-  background: #f8f9fa;
+  background: var(--color-gray-50);
 }
 
 /* Sidebar */
 .sidebar {
   width: 280px;
   background: white;
-  border-right: 1px solid #dee2e6;
+  border-right: 1px solid var(--color-gray-200);
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease;
 }
 
 .sidebar-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-gray-200);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.brand-icon {
+  width: 32px;
+  height: 32px;
+}
+
 .sidebar-title {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 700;
-  color: #212529;
+  color: var(--color-primary);
   margin: 0;
 }
 
@@ -246,7 +439,7 @@ const formatTime = (dateString) => {
 .new-chat-btn {
   margin: 1rem;
   padding: 0.875rem;
-  background: linear-gradient(135deg, #4361ee 0%, #4cc9f0 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   color: white;
   border: none;
   border-radius: 10px;
@@ -261,7 +454,35 @@ const formatTime = (dateString) => {
 
 .new-chat-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+  box-shadow: 0 5px 15px rgba(217, 0, 0, 0.3);
+}
+
+.language-selector {
+  margin: 0 1rem 1rem 1rem;
+  padding: 0.75rem;
+  background: var(--color-gray-50);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.language-selector svg {
+  color: var(--color-primary);
+}
+
+.language-select {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-dark);
+  cursor: pointer;
+}
+
+.language-select:focus {
+  outline: none;
 }
 
 .conversations-list {
@@ -279,12 +500,12 @@ const formatTime = (dateString) => {
 }
 
 .conversation-item:hover {
-  background: #f8f9fa;
+  background: var(--color-gray-50);
 }
 
 .conversation-item.active {
-  background: #e7f3ff;
-  border-left: 3px solid #4361ee;
+  background: var(--color-gray-100);
+  border-left: 3px solid var(--color-primary);
 }
 
 .conv-title {
@@ -307,6 +528,108 @@ const formatTime = (dateString) => {
   color: #6c757d;
 }
 
+.help-section {
+  margin: 0 1rem 1rem 1rem;
+  background: var(--color-gray-50);
+  border-radius: 12px;
+  border: 2px solid var(--color-gray-200);
+  overflow: hidden;
+}
+
+.help-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.help-header:hover {
+  background: var(--color-white);
+}
+
+.help-header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+.help-header-content svg {
+  color: var(--color-primary);
+}
+
+.chevron {
+  color: var(--color-gray-500);
+  transition: transform 0.3s ease;
+}
+
+.chevron.rotated {
+  transform: rotate(180deg);
+}
+
+.help-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 1rem 1rem 1rem;
+}
+
+.help-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--color-white);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--color-gray-700);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.help-link:hover {
+  background: var(--color-white);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translateX(5px);
+}
+
+.help-link svg {
+  flex-shrink: 0;
+  color: var(--color-primary);
+}
+
+.logout-btn {
+  margin: 1rem;
+  padding: 0.875rem;
+  background: white;
+  border: 2px solid var(--color-gray-200);
+  border-radius: 10px;
+  font-weight: 600;
+  color: var(--color-gray-700);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
 /* Main chat area */
 .chat-main {
   flex: 1;
@@ -317,7 +640,7 @@ const formatTime = (dateString) => {
 
 .chat-header {
   background: white;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--color-gray-200);
   padding: 1rem 1.5rem;
   display: flex;
   align-items: center;
@@ -337,7 +660,7 @@ const formatTime = (dateString) => {
 .header-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #2d6a4f;
+  color: var(--color-dark);
   margin: 0;
   flex: 1;
 }
@@ -354,10 +677,10 @@ const formatTime = (dateString) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f8f9fa;
+  background: var(--color-gray-50);
   text-decoration: none;
-  font-size: 1.25rem;
   transition: all 0.2s ease;
+  color: var(--color-dark);
 }
 
 .icon-btn:hover {
@@ -377,6 +700,12 @@ const formatTime = (dateString) => {
   color: #856404;
 }
 
+.inline-icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+
 .messages-container {
   flex: 1;
   overflow-y: auto;
@@ -390,8 +719,10 @@ const formatTime = (dateString) => {
 }
 
 .welcome-icon {
-  font-size: 4rem;
   margin-bottom: 1rem;
+  color: var(--color-primary);
+  display: flex;
+  justify-content: center;
 }
 
 .welcome-title {
@@ -416,7 +747,7 @@ const formatTime = (dateString) => {
 .prompt-btn {
   padding: 1rem;
   background: white;
-  border: 2px solid #dee2e6;
+  border: 2px solid var(--color-gray-200);
   border-radius: 12px;
   font-size: 0.875rem;
   cursor: pointer;
@@ -425,7 +756,7 @@ const formatTime = (dateString) => {
 }
 
 .prompt-btn:hover {
-  border-color: #4361ee;
+  border-color: var(--color-primary);
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
@@ -454,7 +785,7 @@ const formatTime = (dateString) => {
 }
 
 .message.user .message-content {
-  background: linear-gradient(135deg, #4361ee 0%, #4cc9f0 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   color: white;
 }
 
@@ -504,21 +835,48 @@ const formatTime = (dateString) => {
 
 .input-area {
   background: white;
-  border-top: 1px solid #dee2e6;
+  border-top: 1px solid var(--color-gray-200);
   padding: 1.5rem;
 }
 
 .input-form {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   max-width: 1000px;
   margin: 0 auto;
+  align-items: center;
+}
+
+.input-action-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-gray-100);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  color: var(--color-gray-600);
+}
+
+.input-action-btn:hover {
+  background: var(--color-gray-200);
+  color: var(--color-primary);
+  transform: scale(1.1);
+}
+
+.input-action-btn.voice-btn.active {
+  background: var(--color-primary);
+  color: white;
+  animation: pulse 1.5s infinite;
 }
 
 .message-input {
   flex: 1;
   padding: 1rem 1.25rem;
-  border: 2px solid #dee2e6;
+  border: 2px solid var(--color-gray-200);
   border-radius: 24px;
   font-size: 1rem;
   transition: all 0.3s ease;
@@ -526,26 +884,27 @@ const formatTime = (dateString) => {
 
 .message-input:focus {
   outline: none;
-  border-color: #4361ee;
-  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(217, 0, 0, 0.1);
 }
 
 .send-btn {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4361ee 0%, #4cc9f0 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+  color: white;
 }
 
 .send-btn:hover:not(:disabled) {
   transform: scale(1.1);
-  box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+  box-shadow: 0 5px 15px rgba(217, 0, 0, 0.3);
 }
 
 .send-btn:disabled {
@@ -553,8 +912,115 @@ const formatTime = (dateString) => {
   cursor: not-allowed;
 }
 
-.send-icon {
-  font-size: 1.25rem;
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 500px;
+  margin: 1rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.warning-icon {
+  color: #F59E0B;
+  margin-bottom: 1rem;
+}
+
+.modal-header h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+.modal-icon {
+  margin-bottom: 1rem;
+}
+
+.logout-icon {
+  color: var(--color-primary);
+}
+
+.modal-body {
+  margin-bottom: 2rem;
+}
+
+.modal-body p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.modal-body ul {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.modal-body li {
+  margin-bottom: 0.5rem;
+  color: var(--color-gray-700);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn {
+  flex: 1;
+  padding: 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+}
+
+.btn-danger {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-danger:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(217, 0, 0, 0.3);
+}
+
+.btn-secondary {
+  background: var(--color-gray-200);
+  color: var(--color-gray-700);
+}
+
+.btn-secondary:hover {
+  background: var(--color-gray-300);
 }
 
 /* Mobile styles */
@@ -563,6 +1029,7 @@ const formatTime = (dateString) => {
     position: fixed;
     left: 0;
     top: 0;
+    width: 100vw;
     height: 100vh;
     z-index: 1000;
     transform: translateX(-100%);
@@ -572,24 +1039,139 @@ const formatTime = (dateString) => {
     transform: translateX(0);
   }
 
+  .chat-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .header-title {
+    font-size: 0.75rem;
+    line-height: 1.2;
+  }
+
   .mobile-only {
     display: block !important;
   }
 
   .menu-btn {
     display: block !important;
+    margin-right: 0.5rem;
+  }
+
+  .header-actions {
+    gap: 0.5rem;
+  }
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .icon-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .messages-container {
+    padding: 1rem;
   }
 
   .message {
     max-width: 90%;
   }
 
+  .message-content {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+
   .welcome-section {
     margin: 2rem auto;
+  }
+
+  .welcome-title {
+    font-size: 1.5rem;
+  }
+
+  .welcome-text {
+    font-size: 1rem;
   }
 
   .prompt-suggestions {
     grid-template-columns: 1fr;
   }
+
+  .prompt-btn {
+    padding: 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .input-area {
+    padding: 1rem;
+  }
+
+  .input-form {
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .message-input {
+    order: 1;
+    flex-basis: 100%;
+    padding: 0.875rem 1rem;
+    font-size: 0.9375rem;
+  }
+
+  .input-action-btn {
+    order: 2;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+
+  .send-btn {
+    order: 2;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+
+  .modal-content {
+    margin: 0.5rem;
+    padding: 1.5rem;
+  }
+
+  .modal-header h3 {
+    font-size: 1.25rem;
+  }
+
+  .modal-body {
+    font-size: 0.875rem;
+  }
+
+  .btn {
+    padding: 0.875rem;
+    font-size: 0.9375rem;
+  }
+}
+
+/* Dropdown Animation */
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  max-height: 0;
+  padding: 0 1rem;
+}
+
+.dropdown-enter-to,
+.dropdown-leave-from {
+  opacity: 1;
+  max-height: 300px;
+  padding: 0 1rem 1rem 1rem;
 }
 </style>

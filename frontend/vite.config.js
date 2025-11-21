@@ -15,8 +15,8 @@ export default defineConfig({
         name: 'Mzee Chakula',
         short_name: 'MzeeChakula',
         description: 'AI-powered nutritional assistant for elderly care in Uganda',
-        theme_color: '#4361ee',
-        background_color: '#ffffff',
+        theme_color: '#D90000',
+        background_color: '#1E1E1E',
         display: 'standalone',
         start_url: '/',
         scope: '/',
@@ -46,7 +46,8 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        globPatterns: ['**/*.{js,css,html}'],
+        globDirectory: 'dist',
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\..*/i,

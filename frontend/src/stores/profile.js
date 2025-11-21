@@ -3,6 +3,8 @@ import { ref } from 'vue'
 
 export const useProfileStore = defineStore('profile', () => {
   const elderProfile = ref({
+    name: '',
+    gender: '',
     ageRange: '',
     healthConditions: [],
     medications: [],
@@ -30,6 +32,8 @@ export const useProfileStore = defineStore('profile', () => {
 
   const resetProfile = () => {
     elderProfile.value = {
+      name: '',
+      gender: '',
       ageRange: '',
       healthConditions: [],
       medications: [],
