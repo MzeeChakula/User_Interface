@@ -18,7 +18,7 @@ router = APIRouter(
 
 
 
-from api.services.llm_service import llm_service
+from api.services.llm_service import get_llm_service
 
 @router.post("/message", response_model=ChatResponse)
 async def chat_message(
@@ -30,6 +30,8 @@ async def chat_message(
     Send a message to the AI assistant.
     """
     try:
+        # Get service instance
+        llm_service = get_llm_service()
         # 1. Handle Conversation
         conversation_id = request.conversation_id
         if not conversation_id:

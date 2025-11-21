@@ -7,9 +7,9 @@ from langchain_groq import ChatGroq
 from langchain_chroma import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.tools.tavily_search import TavilySearchResults
-from langchain.agents import AgentExecutor, create_tool_calling_agent
+from langgraph.prebuilt import create_react_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 
 class RAGService:
     """
@@ -19,42 +19,68 @@ class RAGService:
     def __init__(self):
         self.groq_api_key = os.getenv("GROQ_API_KEY")
         self.tavily_api_key = os.getenv("TAVILY_API_KEY")
-        
-        if not self.groq_api_key:
-            raise ValueError("GROQ_API_KEY not found in environment variables")
-        
-        # Initialize LLM
-        self.llm = ChatGroq(
-            api_key=self.groq_api_key,
-            model_name="llama-3.3-70b-versatile",
-            temperature=0.7,
-        )
-        
-        # Initialize embeddings (HuggingFace)
-        self.embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2"
-        )
-        
-        # Initialize ChromaDB vector store
-        self.vector_store = Chroma(
-            collection_name="mzeechakula_knowledge",
-            embedding_function=self.embeddings,
-            persist_directory="./chroma_db"
-        )
-        
-        # Initialize Tavily search tool (if API key available)
-        self.tools = []
-        if self.tavily_api_key:
-            self.search_tool = TavilySearchResults(
-                api_key=self.tavily_api_key,
-                max_results=3
+
+        # Lazy-loaded components
+        self._llm = None
+        self._embeddings = None
+        self._vector_store = None
+        self._tools = None
+        self._agent_executor = None
+        self._prompt = None
+
+    @property
+    def llm(self):
+        """Lazy load the LLM"""
+        if self._llm is None:
+            if not self.groq_api_key:
+                raise ValueError("GROQ_API_KEY not found in environment variables")
+            self._llm = ChatGroq(
+                api_key=self.groq_api_key,
+                model_name="llama-3.3-70b-versatile",
+                temperature=0.7,
             )
-            self.tools.append(self.search_tool)
-        
-        # Create agent prompt
-        self.prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are MzeeChakula, a nutrition and food expert assistant.
-            
+        return self._llm
+
+    @property
+    def embeddings(self):
+        """Lazy load the embeddings model"""
+        if self._embeddings is None:
+            self._embeddings = HuggingFaceEmbeddings(
+                model_name="sentence-transformers/all-MiniLM-L6-v2"
+            )
+        return self._embeddings
+
+    @property
+    def vector_store(self):
+        """Lazy load the vector store"""
+        if self._vector_store is None:
+            self._vector_store = Chroma(
+                collection_name="mzeechakula_knowledge",
+                embedding_function=self.embeddings,
+                persist_directory="./chroma_db"
+            )
+        return self._vector_store
+
+    @property
+    def tools(self):
+        """Lazy load the search tools"""
+        if self._tools is None:
+            self._tools = []
+            if self.tavily_api_key:
+                search_tool = TavilySearchResults(
+                    api_key=self.tavily_api_key,
+                    max_results=3
+                )
+                self._tools.append(search_tool)
+        return self._tools
+
+    @property
+    def prompt(self):
+        """Get the agent prompt template"""
+        if self._prompt is None:
+            self._prompt = ChatPromptTemplate.from_messages([
+                ("system", """You are MzeeChakula, a nutrition and food expert assistant.
+
 You have access to:
 1. A knowledge base about nutrition, foods, and health
 2. Internet search capabilities to find current information
@@ -66,20 +92,22 @@ When answering questions:
 - Always cite your sources when using search results
 
 Be friendly, informative, and focus on practical nutrition guidance."""),
-            MessagesPlaceholder(variable_name="chat_history", optional=True),
-            ("human", "{input}"),
-            MessagesPlaceholder(variable_name="agent_scratchpad"),
-        ])
-        
-        # Create agent if tools are available
-        if self.tools:
-            self.agent = create_tool_calling_agent(self.llm, self.tools, self.prompt)
-            self.agent_executor = AgentExecutor(
-                agent=self.agent,
-                tools=self.tools,
-                verbose=True,
-                handle_parsing_errors=True
+                MessagesPlaceholder(variable_name="chat_history", optional=True),
+                ("human", "{input}"),
+                MessagesPlaceholder(variable_name="agent_scratchpad"),
+            ])
+        return self._prompt
+
+    @property
+    def agent_executor(self):
+        """Lazy load the agent executor"""
+        if self._agent_executor is None and self.tools:
+            # Create react agent with langgraph
+            self._agent_executor = create_react_agent(
+                self.llm,
+                self.tools
             )
+        return self._agent_executor
     
     async def add_documents(self, texts: List[str], metadatas: Optional[List[Dict]] = None):
         """
@@ -133,26 +161,34 @@ Be friendly, informative, and focus on practical nutrition guidance."""),
         kb_results = await self.search_knowledge_base(query)
         
         # If agent is available and search is enabled, use it
-        if use_search and self.tools and hasattr(self, 'agent_executor'):
-            # Convert chat history to LangChain format
-            history = []
+        if use_search and self.tools and self.agent_executor:
+            # Build messages for langgraph agent
+            messages = [
+                SystemMessage(content="""You are MzeeChakula, a nutrition and food expert assistant.
+Provide accurate, helpful, and culturally relevant nutrition advice for elderly care in Uganda.""")
+            ]
+
+            # Add chat history
             if chat_history:
                 for msg in chat_history:
                     if msg.get("role") == "user":
-                        history.append(HumanMessage(content=msg.get("content", "")))
+                        messages.append(HumanMessage(content=msg.get("content", "")))
                     elif msg.get("role") == "assistant":
-                        history.append(AIMessage(content=msg.get("content", "")))
-            
-            # Run agent
-            result = await self.agent_executor.ainvoke({
-                "input": query,
-                "chat_history": history
-            })
-            
+                        messages.append(AIMessage(content=msg.get("content", "")))
+
+            # Add current query
+            messages.append(HumanMessage(content=query))
+
+            # Run agent - langgraph returns a state dict with 'messages'
+            result = await self.agent_executor.ainvoke({"messages": messages})
+
+            # Extract the last AI message
+            last_message = result["messages"][-1].content if result.get("messages") else query
+
             return {
-                "answer": result["output"],
+                "answer": last_message,
                 "sources": [
-                    {"type": "knowledge_base", "content": doc["content"]} 
+                    {"type": "knowledge_base", "content": doc["content"]}
                     for doc in kb_results
                 ]
             }
@@ -179,5 +215,13 @@ Answer:"""
                 ]
             }
 
-# Global instance
-rag_service = RAGService()
+
+# Singleton pattern with lazy loading
+_rag_service_instance = None
+
+def get_rag_service() -> RAGService:
+    """Get or create the RAG service singleton instance"""
+    global _rag_service_instance
+    if _rag_service_instance is None:
+        _rag_service_instance = RAGService()
+    return _rag_service_instance

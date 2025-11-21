@@ -5,7 +5,7 @@ from api.models.ai import (
     RAGQuery, RAGResponse
 )
 from api.services.sunbird import sunbird_service
-from api.services.rag_service import rag_service
+from api.services.rag_service import get_rag_service
 
 router = APIRouter(
     prefix="/ai",
@@ -82,6 +82,9 @@ async def rag_query(query: RAGQuery):
     Answer a query using RAG with ChromaDB and Tavily search.
     """
     try:
+        # Get service instance
+        rag_service = get_rag_service()
+
         result = await rag_service.answer_query(
             query=query.query,
             chat_history=query.chat_history,
