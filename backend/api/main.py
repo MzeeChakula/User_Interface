@@ -13,8 +13,15 @@ from .models import database, user, chat
 
 # Create database tables
 # Order matters for foreign keys: User -> Conversation -> Message
-user.Base.metadata.create_all(bind=database.engine)
-chat.Base.metadata.create_all(bind=database.engine)
+try:
+    user.Base.metadata.create_all(bind=database.engine)
+    chat.Base.metadata.create_all(bind=database.engine)
+    logger = logging.getLogger(__name__)
+    logger.info("Database tables created successfully")
+except Exception as e:
+    logger = logging.getLogger(__name__)
+    logger.warning(f"Could not create database tables: {e}")
+    logger.warning("App will continue without database. Auth endpoints may not work.")
 
 # Setup logging
 logging.basicConfig(

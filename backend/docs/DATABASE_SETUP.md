@@ -8,7 +8,8 @@ The MzeeChakula backend uses SQLAlchemy with Supabase PostgreSQL. Database table
 
 Tables are created automatically on first run using SQLAlchemy's `create_all()` method. No manual migration needed for initial setup.
 
-### Tables Created:
+### Tables Created
+
 - **users** - User accounts with authentication
 - **conversations** - Chat conversation history
 - **messages** - Individual chat messages
@@ -35,6 +36,7 @@ DATABASE_URL=postgresql://user:password@host:port/database
 ```
 
 For Supabase:
+
 ```bash
 DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres
 ```
@@ -45,6 +47,7 @@ Alembic is configured but optional. The manual migration script is available at:
 `alembic/versions/001_initial_schema.py`
 
 To use Alembic:
+
 ```bash
 # Check current version
 alembic current
@@ -59,13 +62,17 @@ alembic revision --autogenerate -m "description"
 ## Troubleshooting
 
 ### Tables Not Created
+
 If tables aren't auto-created, check:
+
 1. DATABASE_URL is set correctly
 2. Database is accessible
 3. User has CREATE TABLE permissions
 
 ### Reset Database
+
 To drop and recreate all tables:
+
 ```python
 from api.models.database import Base, engine
 
@@ -77,6 +84,7 @@ Base.metadata.create_all(bind=engine)
 ## Production Deployment
 
 For production on Cloud Run:
+
 1. Set DATABASE_URL in Cloud Run environment variables
 2. Tables will be created on first deployment
 3. Use Alembic for schema changes in production
