@@ -42,7 +42,7 @@ app = FastAPI(
     version="1.0.0",
     contact={
         "name": "MzeeChakula Team",
-        "url": "https://huggingface.co/Shakiran/MzeeChakula_Model",
+        "url": "https://huggingface.co/Shakiran/MzeeChakulaNutritionEnsembleModel",
         "backend": "https://mzeechakula-backend.onrender.com",
         "email": "support@mzeechakula.com"
     },
@@ -129,7 +129,7 @@ async def api_info():
             "docs": "/docs - Interactive API documentation",
             "redoc": "/redoc - Alternative API documentation"
         },
-        "repository": "https://huggingface.co/Shakiran/MzeeChakula_Model"
+        "repository": "https://huggingface.co/Shakiran/MzeeChakulaNutritionEnsembleModel"
     }
 
 if __name__ == "__main__":
