@@ -37,5 +37,15 @@ export const authAPI = {
   async getCurrentUser() {
     const response = await apiClient.get('/auth/me')
     return response.data
+  },
+
+  /**
+   * Request password reset
+   * @param {Object} data - { email }
+   * @returns {Promise}
+   */
+  async resetPassword(data) {
+    const response = await apiClient.post('/auth/reset-password', data)
+    return response.data
   }
 }

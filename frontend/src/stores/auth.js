@@ -49,6 +49,21 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const resetPassword = async (email) => {
+    loading.value = true
+    error.value = null
+    try {
+      await authAPI.resetPassword({ email })
+      return { success: true }
+    } catch (err) {
+      console.error('Reset password error:', err)
+      error.value = err.response?.data?.detail || 'Failed to send reset email'
+      return { success: false, error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
+
   const fetchUser = async () => {
     try {
       const userData = await authAPI.getCurrentUser()
@@ -92,6 +107,8 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     checkAuth,
-    fetchUser
+    checkAuth,
+    fetchUser,
+    resetPassword
   }
 })

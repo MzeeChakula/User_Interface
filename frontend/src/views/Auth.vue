@@ -70,12 +70,41 @@
                 placeholder="Enter your password"
                 required
               />
+              <div class="forgot-password" v-if="!isSignUp">
+                <a href="#" @click.prevent="showResetModal = true">Forgot Password?</a>
+              </div>
             </div>
 
             <button type="submit" class="submit-btn" :disabled="loading">
               {{ loading ? 'Please wait...' : (isSignUp ? 'Sign Up' : 'Sign In') }}
             </button>
           </form>
+
+          <!-- Reset Password Modal -->
+          <div v-if="showResetModal" class="modal-overlay">
+            <div class="modal-content">
+              <h3>Reset Password</h3>
+              <p>Enter your email to receive password reset instructions.</p>
+              <form @submit.prevent="handleResetPassword">
+                <div class="form-group">
+                  <label for="reset-email">Email</label>
+                  <input
+                    v-model="resetEmail"
+                    type="email"
+                    id="reset-email"
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+                <div class="modal-actions">
+                  <button type="button" @click="showResetModal = false" class="cancel-btn">Cancel</button>
+                  <button type="submit" class="submit-btn" :disabled="resetLoading">
+                    {{ resetLoading ? 'Sending...' : 'Send Reset Link' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
 
           <div class="toggle-mode">
             <p>
@@ -110,11 +139,26 @@ const { isOnline } = useOnlineStatus()
 const isSignUp = ref(false)
 const loading = ref(false)
 
-const formData = ref({
-  name: '',
-  email: '',
   password: ''
 })
+
+const showResetModal = ref(false)
+const resetEmail = ref('')
+const resetLoading = ref(false)
+
+const handleResetPassword = async () => {
+  resetLoading.value = true
+  const result = await authStore.resetPassword(resetEmail.value)
+  resetLoading.value = false
+  
+  if (result.success) {
+    alert('If an account exists with this email, you will receive password reset instructions.')
+    showResetModal.value = false
+    resetEmail.value = ''
+  } else {
+    alert(result.error || 'Failed to send reset email. Please try again.')
+  }
+}
 
 const toggleMode = () => {
   isSignUp.value = !isSignUp.value
@@ -454,5 +498,75 @@ const handlePhoneAuth = () => {
     font-size: 1rem;
     padding: 1rem;
   }
+}
+
+.forgot-password {
+  text-align: right;
+  margin-top: 0.25rem;
+}
+
+.forgot-password a {
+  color: var(--color-primary);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--color-white);
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h3 {
+  margin-bottom: 1rem;
+  color: var(--color-dark);
+}
+
+.modal-content p {
+  margin-bottom: 1.5rem;
+  color: var(--color-gray-600);
+  font-size: 0.9rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.cancel-btn {
+  padding: 1rem;
+  background: var(--color-gray-200);
+  color: var(--color-dark);
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+}
+
+.cancel-btn:hover {
+  background: var(--color-gray-300);
 }
 </style>
