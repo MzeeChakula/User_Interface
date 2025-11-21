@@ -41,6 +41,33 @@
         </div>
       </div>
 
+      <!-- Help & Support Section -->
+      <div class="help-section">
+        <button @click="toggleHelpDropdown" class="help-header">
+          <div class="help-header-content">
+            <HelpCircle :size="18" />
+            <span>Help & Support</span>
+          </div>
+          <ChevronDown :size="18" :class="['chevron', { rotated: helpDropdownOpen }]" />
+        </button>
+        <transition name="dropdown">
+          <div v-if="helpDropdownOpen" class="help-links">
+            <router-link to="/faq" class="help-link" @click="sidebarOpen = false">
+              <MessageSquare :size="16" />
+              <span>FAQ</span>
+            </router-link>
+            <router-link to="/contact-us" class="help-link" @click="sidebarOpen = false">
+              <Phone :size="16" />
+              <span>Contact Us</span>
+            </router-link>
+            <router-link to="/send-feedback" class="help-link" @click="sidebarOpen = false">
+              <Send :size="16" />
+              <span>Send Feedback</span>
+            </router-link>
+          </div>
+        </transition>
+      </div>
+
       <!-- Logout Button -->
       <button @click="handleLogout" class="logout-btn">
         <LogOut :size="20" />
@@ -181,7 +208,8 @@ import { useAppStore } from '../stores/app'
 import { useOnlineStatus } from '../composables/useOnlineStatus'
 import {
   X, Plus, Menu, User, Settings, WifiOff, Hand, Send,
-  LogOut, Globe, Upload, Mic, MicOff, AlertTriangle
+  LogOut, Globe, Upload, Mic, MicOff, AlertTriangle,
+  HelpCircle, MessageSquare, Phone, ChevronDown
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -197,6 +225,7 @@ const selectedLanguage = ref(appStore.language)
 const isRecording = ref(false)
 const showUploadWarning = ref(false)
 const fileInput = ref(null)
+const helpDropdownOpen = ref(false)
 
 const examplePrompts = [
   'Create a weekly plan for diabetes',
@@ -211,6 +240,10 @@ onMounted(() => {
 
 const toggleSidebar = () => {
   sidebarOpen.value = !sidebarOpen.value
+}
+
+const toggleHelpDropdown = () => {
+  helpDropdownOpen.value = !helpDropdownOpen.value
 }
 
 const startNewChat = () => {
@@ -473,6 +506,86 @@ const handleFileUpload = (event) => {
   text-align: center;
   padding: 2rem 1rem;
   color: #6c757d;
+}
+
+.help-section {
+  margin: 0 1rem 1rem 1rem;
+  background: var(--color-gray-50);
+  border-radius: 12px;
+  border: 2px solid var(--color-gray-200);
+  overflow: hidden;
+}
+
+.help-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.help-header:hover {
+  background: var(--color-white);
+}
+
+.help-header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+.help-header-content svg {
+  color: var(--color-primary);
+}
+
+.chevron {
+  color: var(--color-gray-500);
+  transition: transform 0.3s ease;
+}
+
+.chevron.rotated {
+  transform: rotate(180deg);
+}
+
+.help-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 1rem 1rem 1rem;
+}
+
+.help-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--color-white);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--color-gray-700);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.help-link:hover {
+  background: var(--color-white);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translateX(5px);
+}
+
+.help-link svg {
+  flex-shrink: 0;
+  color: var(--color-primary);
 }
 
 .logout-btn {
@@ -914,5 +1027,26 @@ const handleFileUpload = (event) => {
     width: 40px;
     height: 40px;
   }
+}
+
+/* Dropdown Animation */
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  max-height: 0;
+  padding: 0 1rem;
+}
+
+.dropdown-enter-to,
+.dropdown-leave-from {
+  opacity: 1;
+  max-height: 300px;
+  padding: 0 1rem 1rem 1rem;
 }
 </style>

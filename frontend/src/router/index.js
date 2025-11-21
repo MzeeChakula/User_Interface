@@ -54,6 +54,21 @@ const routes = [
     name: 'Settings',
     component: () => import('../views/Settings.vue'),
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/faq',
+    name: 'FAQ',
+    component: () => import('../views/FAQ.vue')
+  },
+  {
+    path: '/send-feedback',
+    name: 'SendFeedback',
+    component: () => import('../views/SendFeedback.vue')
+  },
+  {
+    path: '/contact-us',
+    name: 'ContactUs',
+    component: () => import('../views/ContactUs.vue')
   }
 ]
 

@@ -114,7 +114,7 @@ onMounted(() => {
       ease: 'power2.out'
     }, '-=0.4')
     // Hold for a moment
-    .to({}, { duration: 0.8 })
+    .to({}, { duration: 2 })
     // Fade out
     .to('.brand-animation-container', {
       opacity: 0,
@@ -150,10 +150,10 @@ onMounted(() => {
 
 .wave-svg {
   position: absolute;
-  bottom: 0;
+  bottom: -20%;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 80%;
   will-change: transform, opacity;
 }
 
@@ -202,43 +202,51 @@ onMounted(() => {
 }
 
 .brand-content {
-  position: relative;
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 10;
   text-align: center;
   padding: 2rem;
+  width: 100%;
 }
 
 .brand-name {
-  font-size: clamp(2.5rem, 8vw, 4rem);
-  font-weight: 800;
-  color: var(--color-white);
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  margin-bottom: 1rem;
-  letter-spacing: 0.02em;
+  font-size: clamp(3.5rem, 10vw, 5.5rem);
+  font-weight: 900;
+  color: var(--color-dark);
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.01em;
   will-change: transform, opacity;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .brand-tagline {
-  font-size: clamp(1rem, 3vw, 1.5rem);
-  color: var(--color-white);
-  font-weight: 500;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  font-size: clamp(1.25rem, 4vw, 2rem);
+  color: var(--color-gray-700);
+  font-weight: 600;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   will-change: transform, opacity;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 @media (max-width: 768px) {
   .brand-content {
+    top: 18%;
     padding: 1.5rem;
   }
 }
 
 @media (max-width: 480px) {
   .brand-content {
+    top: 20%;
     padding: 1rem;
   }
 
   .brand-name {
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
   }
 }
 </style>

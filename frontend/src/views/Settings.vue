@@ -80,12 +80,17 @@
           <!-- Help & Support -->
           <section class="settings-section">
         <h2 class="section-title">Help & Support</h2>
-        <button @click="showFAQ" class="action-btn">
+        <button @click="goToFAQ" class="action-btn">
           <HelpCircle class="btn-icon" :size="20" />
           <span>FAQ</span>
           <span class="btn-arrow">→</span>
         </button>
-        <button @click="sendFeedback" class="action-btn">
+        <button @click="goToContact" class="action-btn">
+          <Phone class="btn-icon" :size="20" />
+          <span>Contact Us</span>
+          <span class="btn-arrow">→</span>
+        </button>
+        <button @click="goToFeedback" class="action-btn">
           <MessageCircle class="btn-icon" :size="20" />
           <span>Send Feedback</span>
           <span class="btn-arrow">→</span>
@@ -130,7 +135,7 @@ import { useAppStore } from '../stores/app'
 import { useAuthStore } from '../stores/auth'
 import { useChatStore } from '../stores/chat'
 import { useOnlineStatus } from '../composables/useOnlineStatus'
-import { Circle, HelpCircle, MessageCircle, LogOut, Trash2, Eraser, MessageSquare } from 'lucide-vue-next'
+import { Circle, HelpCircle, MessageCircle, LogOut, Trash2, Eraser, MessageSquare, Phone } from 'lucide-vue-next'
 
 const router = useRouter()
 const appStore = useAppStore()
@@ -156,12 +161,16 @@ const changeLanguage = () => {
   alert('Language change will be implemented with i18n integration.')
 }
 
-const showFAQ = () => {
-  alert('FAQ section will be added in a future update.')
+const goToFAQ = () => {
+  router.push({ name: 'FAQ' })
 }
 
-const sendFeedback = () => {
-  alert('Feedback form will be implemented with backend integration.')
+const goToContact = () => {
+  router.push({ name: 'ContactUs' })
+}
+
+const goToFeedback = () => {
+  router.push({ name: 'SendFeedback' })
 }
 
 const logout = () => {
