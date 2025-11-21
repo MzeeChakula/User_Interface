@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
-from api.models.ai import TranslateRequest, TranslateResponse
+from api.models.ai import TranslateRequest, TranslateResponse, RAGQuery, RAGResponse
 from api.services.sunbird import sunbird_service
+from api.services.rag_service import rag_service
 
 router = APIRouter(
     prefix="/ai",
@@ -40,4 +41,26 @@ async def translate_text(request: TranslateRequest):
             detail=f"Translation failed: {str(e)}"
         )
 
+@router.post("/rag", response_model=RAGResponse)
+async def rag_query(query: RAGQuery):
+    """
+    Answer a query using RAG with ChromaDB and Tavily search.
+    """
+    try:
+        result = await rag_service.answer_query(
+            query=query.query,
+            chat_history=query.chat_history,
+            use_search=query.use_search
+        )
+        
+        return RAGResponse(
+            answer=result["answer"],
+            sources=result["sources"]
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"RAG query failed: {str(e)}"
+        )
 

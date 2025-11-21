@@ -83,8 +83,8 @@ async def chat_message(
             
         messages.append({"role": "user", "content": request.message})
         
-        # 4. Call Groq API via LLM Service
-        response_content = llm_service.get_completion(messages)
+        # 4. Call Groq API via LLM Service (using LangChain)
+        response_content = await llm_service.generate_response(messages)
         
         # 5. Save Assistant Response
         assistant_msg = MessageDB(

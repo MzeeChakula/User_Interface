@@ -1,25 +1,24 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+"""
+AI-related Pydantic schemas
+"""
+from typing import Optional, List, Dict
+from pydantic import BaseModel
 
 class TranslateRequest(BaseModel):
-    """Request schema for translation"""
-    text: str = Field(..., description="Text to translate")
-    source_lang: str = Field(..., description="Source language code (e.g., 'en', 'lg')")
-    target_lang: str = Field(..., description="Target language code (e.g., 'lg', 'en')")
+    text: str
+    source_lang: str = "en"
+    target_lang: str = "lg"  # Luganda
 
 class TranslateResponse(BaseModel):
-    """Response schema for translation"""
-    translated_text: str = Field(..., description="Translated text")
-    source_lang: str = Field(..., description="Source language code")
-    target_lang: str = Field(..., description="Target language code")
-    confidence: Optional[float] = Field(None, description="Translation confidence score")
+    translated_text: str
+    source_lang: str
+    target_lang: str
 
 class RAGQuery(BaseModel):
-    """Request schema for RAG query"""
-    query: str = Field(..., description="User query")
-    context_filters: Optional[Dict[str, Any]] = Field(None, description="Filters for knowledge graph retrieval")
+    query: str
+    use_search: bool = True
+    chat_history: Optional[List[Dict[str, str]]] = None
 
 class RAGResponse(BaseModel):
-    """Response schema for RAG query"""
-    answer: str = Field(..., description="Generated answer")
-    sources: List[str] = Field(default=[], description="List of sources used")
+    answer: str
+    sources: List[Dict]

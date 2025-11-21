@@ -1,59 +1,58 @@
+"""
+LLM Service using LangChain with Groq
+"""
 import os
-import openai
-import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Optional
+from langchain_groq import ChatGroq
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 
-logger = logging.getLogger(__name__)
 
 class LLMService:
-    """
-    Service for interacting with LLM (Groq via OpenAI SDK).
-    """
-    
+
     def __init__(self):
         self.api_key = os.getenv("GROQ_API_KEY")
-        self.base_url = "https://api.groq.com/openai/v1"
-        self.model = "llama3-70b-8192"
-        self.client = None
+        if not self.api_key:
+            raise ValueError("GROQ_API_KEY not found in environment variables")
         
-        if self.api_key:
-            try:
-                self.client = openai.OpenAI(
-                    base_url=self.base_url,
-                    api_key=self.api_key
-                )
-                logger.info(f"Connected to Groq LLM ({self.model})")
-            except Exception as e:
-                logger.error(f"Failed to initialize LLM client: {e}")
-        else:
-            logger.warning("GROQ_API_KEY not set. LLM features disabled.")
-
-    def get_completion(
-        self, 
-        messages: List[Dict[str, str]], 
-        temperature: float = 0.7,
-        max_tokens: int = 1024
+        # Initialize LangChain Groq client
+        self.llm = ChatGroq(
+            api_key=self.api_key,
+            model_name="llama-3.3-70b-versatile",
+            temperature=0.7,
+            max_tokens=1024,
+        )
+    
+    async def generate_response(
+        self,
+        messages: List[Dict[str, str]],
+        system_prompt: Optional[str] = None,
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None
     ) -> str:
-        """
-        Get completion from LLM.
-        """
-        if not self.client:
-            return "LLM service is not available."
 
-        try:
-            completion = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                top_p=1,
-                stream=False,
-                stop=None,
+        langchain_messages = []
+        
+        if system_prompt:
+            langchain_messages.append(SystemMessage(content=system_prompt))
+        
+        for msg in messages:
+            role = msg.get("role")
+            content = msg.get("content", "")
+            
+            if role == "user":
+                langchain_messages.append(HumanMessage(content=content))
+            elif role == "assistant":
+                langchain_messages.append(AIMessage(content=content))
+            elif role == "system":
+                langchain_messages.append(SystemMessage(content=content))
+        
+        # Create LLM with optional overrides
+        llm = self.llm
+        if temperature is not None or max_tokens is not None:
+            llm = ChatGroq(
+                api_key=self.api_key,
+                model_name="llama-3.3-70b-versatile",
+                temperature=temperature if temperature is not None else 0.7,
+                max_tokens=max_tokens if max_tokens is not None else 1024,
             )
-            return completion.choices[0].message.content
-        except Exception as e:
-            logger.error(f"LLM completion failed: {e}")
-            raise
-
-# Singleton instance
 llm_service = LLMService()
