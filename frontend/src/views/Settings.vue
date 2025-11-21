@@ -1,0 +1,429 @@
+<template>
+  <div class="settings-container">
+    <header class="settings-header">
+      <button @click="goBack" class="back-btn">← Back</button>
+      <h1 class="header-title">Settings</h1>
+      <div class="spacer"></div>
+    </header>
+
+    <div class="settings-content">
+      <!-- Language Settings -->
+      <section class="settings-section">
+        <h2 class="section-title">Language Preferences</h2>
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Display Language</div>
+            <div class="setting-description">Choose your preferred language</div>
+          </div>
+          <select v-model="appStore.language" @change="changeLanguage" class="setting-select">
+            <option value="en">English</option>
+            <option value="lg">Luganda</option>
+            <option value="sw">Swahili</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Notifications Settings -->
+      <section class="settings-section">
+        <h2 class="section-title">Notifications</h2>
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Push Notifications</div>
+            <div class="setting-description">Receive reminders and tips</div>
+          </div>
+          <label class="toggle-switch">
+            <input
+              type="checkbox"
+              v-model="appStore.notifications"
+              @change="appStore.toggleNotifications"
+            />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Connection Status -->
+      <section class="settings-section">
+        <h2 class="section-title">Connection</h2>
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Network Status</div>
+            <div class="setting-description">
+              {{ isOnline ? 'Connected to the internet' : 'Offline mode' }}
+            </div>
+          </div>
+          <div class="status-indicator" :class="{ online: isOnline, offline: !isOnline }">
+            {{ isOnline ? '🟢' : '🔴' }}
+          </div>
+        </div>
+      </section>
+
+      <!-- App Information -->
+      <section class="settings-section">
+        <h2 class="section-title">App Information</h2>
+        <div class="info-item">
+          <span class="info-label">Version</span>
+          <span class="info-value">1.0.0</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Storage Used</span>
+          <span class="info-value">{{ storageUsed }} KB</span>
+        </div>
+      </section>
+
+      <!-- Help & Support -->
+      <section class="settings-section">
+        <h2 class="section-title">Help & Support</h2>
+        <button @click="showFAQ" class="action-btn">
+          <span class="btn-icon">❓</span>
+          <span>FAQ</span>
+          <span class="btn-arrow">→</span>
+        </button>
+        <button @click="sendFeedback" class="action-btn">
+          <span class="btn-icon">💬</span>
+          <span>Send Feedback</span>
+          <span class="btn-arrow">→</span>
+        </button>
+      </section>
+
+      <!-- Account Actions -->
+      <section class="settings-section">
+        <h2 class="section-title">Account</h2>
+        <button @click="logout" class="action-btn danger">
+          <span class="btn-icon">🚪</span>
+          <span>Log Out</span>
+        </button>
+        <button @click="deleteAccount" class="action-btn danger">
+          <span class="btn-icon">🗑️</span>
+          <span>Delete Account</span>
+        </button>
+      </section>
+
+      <!-- Data Management -->
+      <section class="settings-section">
+        <h2 class="section-title">Data Management</h2>
+        <button @click="clearCache" class="action-btn">
+          <span class="btn-icon">🧹</span>
+          <span>Clear Cache</span>
+        </button>
+        <button @click="clearConversations" class="action-btn">
+          <span class="btn-icon">💭</span>
+          <span>Clear All Conversations</span>
+        </button>
+      </section>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAppStore } from '../stores/app'
+import { useAuthStore } from '../stores/auth'
+import { useChatStore } from '../stores/chat'
+import { useOnlineStatus } from '../composables/useOnlineStatus'
+
+const router = useRouter()
+const appStore = useAppStore()
+const authStore = useAuthStore()
+const chatStore = useChatStore()
+const { isOnline } = useOnlineStatus()
+
+const storageUsed = computed(() => {
+  let size = 0
+  for (let key in localStorage) {
+    if (localStorage.hasOwnProperty(key)) {
+      size += localStorage[key].length + key.length
+    }
+  }
+  return (size / 1024).toFixed(2)
+})
+
+const goBack = () => {
+  router.push({ name: 'Chat' })
+}
+
+const changeLanguage = () => {
+  alert('Language change will be implemented with i18n integration.')
+}
+
+const showFAQ = () => {
+  alert('FAQ section will be added in a future update.')
+}
+
+const sendFeedback = () => {
+  alert('Feedback form will be implemented with backend integration.')
+}
+
+const logout = () => {
+  if (confirm('Are you sure you want to log out?')) {
+    authStore.logout()
+    router.push({ name: 'Auth' })
+  }
+}
+
+const deleteAccount = () => {
+  const confirmation = prompt(
+    'This action cannot be undone. Type "DELETE" to confirm account deletion:'
+  )
+
+  if (confirmation === 'DELETE') {
+    authStore.logout()
+    localStorage.clear()
+    router.push({ name: 'Auth' })
+    alert('Your account has been deleted.')
+  }
+}
+
+const clearCache = () => {
+  if (confirm('Are you sure you want to clear the cache?')) {
+    const authToken = localStorage.getItem('auth_token')
+    const hasSeenIntro = localStorage.getItem('hasSeenIntro')
+
+    localStorage.clear()
+
+    if (authToken) localStorage.setItem('auth_token', authToken)
+    if (hasSeenIntro) localStorage.setItem('hasSeenIntro', hasSeenIntro)
+
+    alert('Cache cleared successfully!')
+  }
+}
+
+const clearConversations = () => {
+  if (confirm('Are you sure you want to delete all conversations? This cannot be undone.')) {
+    chatStore.conversations = []
+    chatStore.currentConversation = null
+    chatStore.saveConversations()
+    alert('All conversations have been deleted.')
+  }
+}
+</script>
+
+<style scoped>
+.settings-container {
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+.settings-header {
+  background: white;
+  border-bottom: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #4361ee;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+  color: #2d46b9;
+}
+
+.header-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0;
+}
+
+.spacer {
+  width: 60px;
+}
+
+.settings-content {
+  padding: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.settings-section {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #f8f9fa;
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+}
+
+.setting-info {
+  flex: 1;
+}
+
+.setting-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 0.25rem;
+}
+
+.setting-description {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.setting-select {
+  padding: 0.5rem 1rem;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.setting-select:focus {
+  outline: none;
+  border-color: #4361ee;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  display: inline-block;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 28px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: #4361ee;
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(24px);
+}
+
+.status-indicator {
+  font-size: 1.5rem;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.875rem 0;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.info-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.action-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 2px solid #dee2e6;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.action-btn:last-child {
+  margin-bottom: 0;
+}
+
+.action-btn:hover {
+  border-color: #4361ee;
+  background: #f8f9fa;
+  transform: translateX(5px);
+}
+
+.action-btn.danger {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.action-btn.danger:hover {
+  background: #fff5f5;
+  border-color: #dc3545;
+}
+
+.btn-icon {
+  font-size: 1.25rem;
+}
+
+.btn-arrow {
+  margin-left: auto;
+  color: #6c757d;
+}
+
+@media (max-width: 768px) {
+  .settings-content {
+    padding: 1rem;
+  }
+
+  .settings-section {
+    padding: 1rem;
+  }
+}
+</style>
