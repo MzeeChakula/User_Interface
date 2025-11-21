@@ -44,60 +44,70 @@ FastAPI backend for the MzeeChakula nutrition assistant, providing AI-powered nu
 ### Setup
 
 1. **Clone and navigate**:
+
 ```bash
 cd User_Interface/backend
 ```
 
-2. **Create virtual environment**:
+2.**Create virtual environment**:
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
-3. **Install dependencies**:
+3.**Install dependencies**:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-4. **Configure environment**:
+4.**Configure environment**:
+
 ```bash
 cp .env.example .env
 # Edit .env with your API keys and database credentials
 ```
 
-5. **Run the server**:
+5.**Run the server**:
+
 ```bash
 uvicorn api.main:app --reload
 ```
 
 ### Local API Documentation
 
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
-- Health Check: http://localhost:8000/health
+- Swagger UI: <http://localhost:8000/docs>
+- ReDoc: <http://localhost:8000/redoc>
+- Health Check: <http://localhost:8000/health>
 
 ## API Endpoints
 
 ### Authentication
+
 - `POST /auth/register` - User registration
 - `POST /auth/token` - Login and get JWT token
 
 ### Chat
+
 - `POST /chat/message` - Send message to AI assistant
 
 ### AI Services
+
 - `POST /ai/translate` - Translate text (50+ languages)
 - `POST /ai/detect-language` - Detect language
 - `GET /ai/languages` - List supported languages
 - `POST /ai/rag` - RAG query with search
 
 ### Predictions
+
 - `POST /predict/` - Predict caloric needs
 - `POST /predict/batch` - Batch predictions
 - `GET /predict/recommend` - Food recommendations
 - `GET /predict/example` - Example input format
 
 ### Health & Monitoring
+
 - `GET /health` - Health check
 - `GET /metrics` - Prometheus metrics
 
@@ -128,9 +138,10 @@ CHROMA_PERSIST_DIR=./chroma_db
 
 ### Render (Current)
 
-Deployed at: https://mzeechakula-user-interface-backend.onrender.com
+Deployed at: <https://mzeechakula-user-interface-backend.onrender.com>
 
 Configuration files:
+
 - `Procfile` - Startup command
 - `render.yaml` - Infrastructure config
 - `runtime.txt` - Python version
@@ -153,7 +164,7 @@ docker-compose up
 
 ## Project Structure
 
-```
+```bash
 backend/
 ├── api/
 │   ├── main.py              # FastAPI app
@@ -188,8 +199,8 @@ backend/
 ## Support
 
 - **Issues**: GitHub Issues
-- **API Docs**: https://mzeechakula-user-interface-backend.onrender.com/docs
-- **Health Status**: https://mzeechakula-user-interface-backend.onrender.com/health
+- **API Docs**: <https://mzeechakula-user-interface-backend.onrender.com/docs>
+- **Health Status**: <https://mzeechakula-user-interface-backend.onrender.com/health>
 
 ## License
 
