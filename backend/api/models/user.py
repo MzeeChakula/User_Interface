@@ -35,6 +35,10 @@ class TokenData(BaseModel):
     """JWT token data schema"""
     email: Optional[str] = None
 
+class PasswordResetRequest(BaseModel):
+    """Password reset request schema"""
+    email: str = Field(..., description="User email")
+
 # --- SQLAlchemy Models ---
 
 class UserDB(Base):
