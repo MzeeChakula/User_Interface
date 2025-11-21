@@ -53,7 +53,7 @@
             </div>
           </div>
           <div class="status-indicator" :class="{ online: isOnline, offline: !isOnline }">
-            {{ isOnline ? '🟢' : '🔴' }}
+            <Circle :size="20" :fill="isOnline ? '#10B981' : '#EF4444'" :stroke="isOnline ? '#10B981' : '#EF4444'" />
           </div>
         </div>
       </section>
@@ -75,12 +75,12 @@
       <section class="settings-section">
         <h2 class="section-title">Help & Support</h2>
         <button @click="showFAQ" class="action-btn">
-          <span class="btn-icon">❓</span>
+          <HelpCircle class="btn-icon" :size="20" />
           <span>FAQ</span>
           <span class="btn-arrow">→</span>
         </button>
         <button @click="sendFeedback" class="action-btn">
-          <span class="btn-icon">💬</span>
+          <MessageCircle class="btn-icon" :size="20" />
           <span>Send Feedback</span>
           <span class="btn-arrow">→</span>
         </button>
@@ -90,11 +90,11 @@
       <section class="settings-section">
         <h2 class="section-title">Account</h2>
         <button @click="logout" class="action-btn danger">
-          <span class="btn-icon">🚪</span>
+          <LogOut class="btn-icon" :size="20" />
           <span>Log Out</span>
         </button>
         <button @click="deleteAccount" class="action-btn danger">
-          <span class="btn-icon">🗑️</span>
+          <Trash2 class="btn-icon" :size="20" />
           <span>Delete Account</span>
         </button>
       </section>
@@ -103,11 +103,11 @@
       <section class="settings-section">
         <h2 class="section-title">Data Management</h2>
         <button @click="clearCache" class="action-btn">
-          <span class="btn-icon">🧹</span>
+          <Eraser class="btn-icon" :size="20" />
           <span>Clear Cache</span>
         </button>
         <button @click="clearConversations" class="action-btn">
-          <span class="btn-icon">💭</span>
+          <MessageSquare class="btn-icon" :size="20" />
           <span>Clear All Conversations</span>
         </button>
       </section>
@@ -122,6 +122,7 @@ import { useAppStore } from '../stores/app'
 import { useAuthStore } from '../stores/auth'
 import { useChatStore } from '../stores/chat'
 import { useOnlineStatus } from '../composables/useOnlineStatus'
+import { Circle, HelpCircle, MessageCircle, LogOut, Trash2, Eraser, MessageSquare } from 'lucide-vue-next'
 
 const router = useRouter()
 const appStore = useAppStore()
@@ -202,12 +203,12 @@ const clearConversations = () => {
 <style scoped>
 .settings-container {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: var(--color-gray-50);
 }
 
 .settings-header {
   background: white;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--color-gray-200);
   padding: 1rem 1.5rem;
   display: flex;
   align-items: center;
@@ -219,7 +220,7 @@ const clearConversations = () => {
   border: none;
   font-size: 1rem;
   font-weight: 600;
-  color: #4361ee;
+  color: var(--color-primary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -261,7 +262,7 @@ const clearConversations = () => {
   color: #212529;
   margin: 0 0 1rem 0;
   padding-bottom: 0.75rem;
-  border-bottom: 2px solid #f8f9fa;
+  border-bottom: 2px solid var(--color-gray-50);
 }
 
 .setting-item {
@@ -289,7 +290,7 @@ const clearConversations = () => {
 
 .setting-select {
   padding: 0.5rem 1rem;
-  border: 2px solid #dee2e6;
+  border: 2px solid var(--color-gray-200);
   border-radius: 8px;
   font-size: 0.875rem;
   background: white;
@@ -299,7 +300,7 @@ const clearConversations = () => {
 
 .setting-select:focus {
   outline: none;
-  border-color: #4361ee;
+  border-color: var(--color-primary);
 }
 
 .toggle-switch {
@@ -340,7 +341,7 @@ const clearConversations = () => {
 }
 
 input:checked + .toggle-slider {
-  background-color: #4361ee;
+  background-color: var(--color-primary);
 }
 
 input:checked + .toggle-slider:before {
@@ -355,7 +356,7 @@ input:checked + .toggle-slider:before {
   display: flex;
   justify-content: space-between;
   padding: 0.875rem 0;
-  border-bottom: 1px solid #f8f9fa;
+  border-bottom: 1px solid var(--color-gray-50);
 }
 
 .info-item:last-child {
@@ -379,7 +380,7 @@ input:checked + .toggle-slider:before {
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  border: 2px solid #dee2e6;
+  border: 2px solid var(--color-gray-200);
   border-radius: 10px;
   background: white;
   cursor: pointer;
@@ -393,8 +394,8 @@ input:checked + .toggle-slider:before {
 }
 
 .action-btn:hover {
-  border-color: #4361ee;
-  background: #f8f9fa;
+  border-color: var(--color-primary);
+  background: var(--color-gray-50);
   transform: translateX(5px);
 }
 

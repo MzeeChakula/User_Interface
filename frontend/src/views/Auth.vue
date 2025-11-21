@@ -2,19 +2,19 @@
   <div class="auth-container">
     <div class="auth-card">
       <div class="header">
-        <img src="/icons/logo.svg" alt="Mzee Chakula" class="logo" />
+        <img src="/icons/logotransparent.svg" alt="Mzee Chakula" class="logo" />
         <h1 class="title">{{ isSignUp ? 'Create Account' : 'Welcome Back' }}</h1>
         <p class="subtitle">{{ isSignUp ? 'Sign up to get started' : 'Sign in to continue' }}</p>
       </div>
 
       <div class="auth-methods">
         <button class="auth-btn google-btn" @click="handleGoogleAuth">
-          <span class="btn-icon">🔐</span>
+          <Lock class="btn-icon" :size="20" />
           {{ isSignUp ? 'Sign up with Google' : 'Sign in with Google' }}
         </button>
 
         <button class="auth-btn phone-btn" @click="handlePhoneAuth">
-          <span class="btn-icon">📱</span>
+          <Smartphone class="btn-icon" :size="20" />
           {{ isSignUp ? 'Sign up with Phone' : 'Sign in with Phone' }}
         </button>
       </div>
@@ -24,10 +24,9 @@
       </div>
 
       <form @submit.prevent="handleEmailAuth" class="email-form">
-        <div class="form-group">
-          <label for="name" v-if="isSignUp">Name</label>
+        <div class="form-group" v-if="isSignUp">
+          <label for="name">Name</label>
           <input
-            v-if="isSignUp"
             v-model="formData.name"
             type="text"
             id="name"
@@ -73,7 +72,7 @@
       </div>
 
       <div v-if="!isOnline" class="offline-notice">
-        <span class="offline-icon">📡</span>
+        <WifiOff class="offline-icon" :size="20" />
         You're offline. Sign in will be available when you're back online.
       </div>
     </div>
@@ -85,6 +84,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useOnlineStatus } from '../composables/useOnlineStatus'
+import { Lock, Smartphone, WifiOff } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -134,14 +134,15 @@ const handlePhoneAuth = () => {
   align-items: center;
   justify-content: center;
   padding: 2rem 1.5rem;
-  background: linear-gradient(135deg, #4361ee 0%, #4cc9f0 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  width: 100%;
 }
 
 .auth-card {
-  background: white;
+  background: var(--color-white);
   border-radius: 24px;
   padding: 2.5rem 2rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   width: 100%;
   max-width: 450px;
 }
@@ -160,13 +161,13 @@ const handlePhoneAuth = () => {
 .title {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #212529;
+  color: var(--color-dark);
   margin-bottom: 0.5rem;
 }
 
 .subtitle {
   font-size: 1rem;
-  color: #6c757d;
+  color: var(--color-gray-600);
 }
 
 .auth-methods {
@@ -187,13 +188,13 @@ const handlePhoneAuth = () => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  border: 2px solid #dee2e6;
-  background: white;
-  color: #212529;
+  border: 2px solid var(--color-gray-300);
+  background: var(--color-white);
+  color: var(--color-dark);
 }
 
 .auth-btn:hover {
-  border-color: #4361ee;
+  border-color: var(--color-primary);
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
@@ -215,7 +216,7 @@ const handlePhoneAuth = () => {
   top: 50%;
   width: 40%;
   height: 1px;
-  background: #dee2e6;
+  background: var(--color-gray-300);
 }
 
 .divider::before {
@@ -227,9 +228,9 @@ const handlePhoneAuth = () => {
 }
 
 .divider span {
-  background: white;
+  background: var(--color-white);
   padding: 0 1rem;
-  color: #6c757d;
+  color: var(--color-gray-500);
   font-size: 0.875rem;
 }
 
@@ -248,12 +249,12 @@ const handlePhoneAuth = () => {
 .form-group label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #495057;
+  color: var(--color-gray-700);
 }
 
 .form-group input {
   padding: 0.875rem 1rem;
-  border: 2px solid #dee2e6;
+  border: 2px solid var(--color-gray-300);
   border-radius: 10px;
   font-size: 1rem;
   transition: all 0.3s ease;
@@ -261,14 +262,14 @@ const handlePhoneAuth = () => {
 
 .form-group input:focus {
   outline: none;
-  border-color: #4361ee;
-  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(217, 0, 0, 0.1);
 }
 
 .submit-btn {
   padding: 1rem;
-  background: linear-gradient(135deg, #4361ee 0%, #4cc9f0 100%);
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-white);
   border: none;
   border-radius: 12px;
   font-size: 1rem;
@@ -279,8 +280,9 @@ const handlePhoneAuth = () => {
 }
 
 .submit-btn:hover:not(:disabled) {
+  background: var(--color-primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(67, 97, 238, 0.3);
+  box-shadow: 0 5px 20px rgba(217, 0, 0, 0.3);
 }
 
 .submit-btn:disabled {
@@ -292,13 +294,13 @@ const handlePhoneAuth = () => {
   text-align: center;
   margin-top: 1.5rem;
   font-size: 0.875rem;
-  color: #6c757d;
+  color: var(--color-gray-600);
 }
 
 .toggle-btn {
   background: none;
   border: none;
-  color: #4361ee;
+  color: var(--color-primary);
   font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
@@ -307,7 +309,8 @@ const handlePhoneAuth = () => {
 .offline-notice {
   margin-top: 1.5rem;
   padding: 1rem;
-  background: #fff3cd;
+  background: var(--color-warning);
+  background: #FFF3CD;
   border-radius: 10px;
   text-align: center;
   font-size: 0.875rem;
@@ -320,5 +323,34 @@ const handlePhoneAuth = () => {
 
 .offline-icon {
   font-size: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .auth-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .auth-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .logo {
+    width: 70px;
+    height: 70px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .header {
+    margin-bottom: 1.5rem;
+  }
 }
 </style>

@@ -222,12 +222,12 @@ const resetForm = () => {
 <style scoped>
 .profile-container {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: var(--color-gray-50);
 }
 
 .profile-header {
   background: white;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--color-gray-200);
   padding: 1rem 1.5rem;
   display: flex;
   align-items: center;
@@ -239,7 +239,7 @@ const resetForm = () => {
   border: none;
   font-size: 1rem;
   font-weight: 600;
-  color: #4361ee;
+  color: var(--color-primary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -298,7 +298,7 @@ const resetForm = () => {
 
 .form-select {
   padding: 0.875rem 1rem;
-  border: 2px solid #dee2e6;
+  border: 2px solid var(--color-gray-200);
   border-radius: 10px;
   font-size: 1rem;
   transition: all 0.3s ease;
@@ -308,7 +308,7 @@ const resetForm = () => {
 
 .form-select:focus {
   outline: none;
-  border-color: #4361ee;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
 }
 
@@ -323,15 +323,15 @@ const resetForm = () => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem;
-  border: 2px solid #dee2e6;
+  border: 2px solid var(--color-gray-200);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .checkbox-label:hover {
-  border-color: #4361ee;
-  background: #f8f9fa;
+  border-color: var(--color-primary);
+  background: var(--color-gray-50);
 }
 
 .checkbox-input {
@@ -342,7 +342,7 @@ const resetForm = () => {
 
 .checkbox-input:checked + span {
   font-weight: 600;
-  color: #4361ee;
+  color: var(--color-primary);
 }
 
 .tags-input {
@@ -350,14 +350,14 @@ const resetForm = () => {
   flex-wrap: wrap;
   gap: 0.5rem;
   padding: 0.75rem;
-  border: 2px solid #dee2e6;
+  border: 2px solid var(--color-gray-200);
   border-radius: 10px;
   min-height: 50px;
   transition: all 0.3s ease;
 }
 
 .tags-input:focus-within {
-  border-color: #4361ee;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
 }
 
@@ -366,8 +366,8 @@ const resetForm = () => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
-  background: #e7f3ff;
-  color: #4361ee;
+  background: var(--color-gray-100);
+  color: var(--color-primary);
   border-radius: 6px;
   font-size: 0.875rem;
   font-weight: 500;
@@ -376,7 +376,7 @@ const resetForm = () => {
 .tag-remove {
   background: none;
   border: none;
-  color: #4361ee;
+  color: var(--color-primary);
   cursor: pointer;
   font-size: 1rem;
   line-height: 1;
@@ -410,7 +410,7 @@ const resetForm = () => {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #4361ee 0%, #4cc9f0 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   color: white;
 }
 
@@ -422,11 +422,11 @@ const resetForm = () => {
 .btn-secondary {
   background: white;
   color: #6c757d;
-  border: 2px solid #dee2e6;
+  border: 2px solid var(--color-gray-200);
 }
 
 .btn-secondary:hover {
-  background: #f8f9fa;
+  background: var(--color-gray-50);
   border-color: #adb5bd;
 }
 

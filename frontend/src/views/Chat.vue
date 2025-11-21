@@ -4,11 +4,11 @@
     <aside class="sidebar" :class="{ open: sidebarOpen }">
       <div class="sidebar-header">
         <h2 class="sidebar-title">Chat History</h2>
-        <button @click="toggleSidebar" class="close-btn mobile-only">✕</button>
+        <button @click="toggleSidebar" class="close-btn mobile-only"><X :size="24" /></button>
       </div>
 
       <button @click="startNewChat" class="new-chat-btn">
-        <span>➕</span> New Chat
+        <Plus :size="20" /> New Chat
       </button>
 
       <div class="conversations-list">
@@ -32,23 +32,23 @@
     <!-- Main chat area -->
     <main class="chat-main">
       <header class="chat-header">
-        <button @click="toggleSidebar" class="menu-btn mobile-only">☰</button>
+        <button @click="toggleSidebar" class="menu-btn mobile-only"><Menu :size="24" /></button>
         <h1 class="header-title">Mzee Chakula</h1>
         <div class="header-actions">
-          <router-link to="/profile" class="icon-btn" title="Profile">👤</router-link>
-          <router-link to="/settings" class="icon-btn" title="Settings">⚙️</router-link>
+          <router-link to="/profile" class="icon-btn" title="Profile"><User :size="20" /></router-link>
+          <router-link to="/settings" class="icon-btn" title="Settings"><Settings :size="20" /></router-link>
         </div>
       </header>
 
       <!-- Online/Offline status banner -->
       <div v-if="!isOnline" class="status-banner offline">
-        📡 You're offline. Messages will be sent when you're back online.
+        <WifiOff :size="20" class="inline-icon" /> You're offline. Messages will be sent when you're back online.
       </div>
 
       <!-- Messages area -->
       <div class="messages-container" ref="messagesContainer">
         <div v-if="!chatStore.currentConversation || chatStore.currentConversation.messages.length === 0" class="welcome-section">
-          <div class="welcome-icon">👋</div>
+          <div class="welcome-icon"><Hand :size="64" /></div>
           <h2 class="welcome-title">Welcome to Mzee Chakula</h2>
           <p class="welcome-text">Ask me anything about nutritional planning for elderly care</p>
 
@@ -96,7 +96,7 @@
             class="send-btn"
             :disabled="!messageInput.trim() || chatStore.isLoading"
           >
-            <span class="send-icon">🚀</span>
+            <Send :size="20" />
           </button>
         </form>
       </div>
@@ -108,6 +108,7 @@
 import { ref, nextTick, onMounted } from 'vue'
 import { useChatStore } from '../stores/chat'
 import { useOnlineStatus } from '../composables/useOnlineStatus'
+import { X, Plus, Menu, User, Settings, WifiOff, Hand, Send } from 'lucide-vue-next'
 
 const chatStore = useChatStore()
 const { isOnline } = useOnlineStatus()
@@ -206,14 +207,14 @@ const formatTime = (dateString) => {
 .chat-container {
   display: flex;
   height: 100vh;
-  background: #f8f9fa;
+  background: var(--color-gray-50);
 }
 
 /* Sidebar */
 .sidebar {
   width: 280px;
   background: white;
-  border-right: 1px solid #dee2e6;
+  border-right: 1px solid var(--color-gray-200);
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease;
@@ -221,7 +222,7 @@ const formatTime = (dateString) => {
 
 .sidebar-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--color-gray-200);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -246,7 +247,7 @@ const formatTime = (dateString) => {
 .new-chat-btn {
   margin: 1rem;
   padding: 0.875rem;
-  background: linear-gradient(135deg, #4361ee 0%, #4cc9f0 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   color: white;
   border: none;
   border-radius: 10px;
@@ -279,12 +280,12 @@ const formatTime = (dateString) => {
 }
 
 .conversation-item:hover {
-  background: #f8f9fa;
+  background: var(--color-gray-50);
 }
 
 .conversation-item.active {
-  background: #e7f3ff;
-  border-left: 3px solid #4361ee;
+  background: var(--color-gray-100);
+  border-left: 3px solid var(--color-primary);
 }
 
 .conv-title {
@@ -317,7 +318,7 @@ const formatTime = (dateString) => {
 
 .chat-header {
   background: white;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--color-gray-200);
   padding: 1rem 1.5rem;
   display: flex;
   align-items: center;
@@ -337,7 +338,7 @@ const formatTime = (dateString) => {
 .header-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #2d6a4f;
+  color: var(--color-primary);
   margin: 0;
   flex: 1;
 }
@@ -354,7 +355,7 @@ const formatTime = (dateString) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f8f9fa;
+  background: var(--color-gray-50);
   text-decoration: none;
   font-size: 1.25rem;
   transition: all 0.2s ease;
@@ -375,6 +376,12 @@ const formatTime = (dateString) => {
 .status-banner.offline {
   background: #fff3cd;
   color: #856404;
+}
+
+.inline-icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.5rem;
 }
 
 .messages-container {
@@ -416,7 +423,7 @@ const formatTime = (dateString) => {
 .prompt-btn {
   padding: 1rem;
   background: white;
-  border: 2px solid #dee2e6;
+  border: 2px solid var(--color-gray-200);
   border-radius: 12px;
   font-size: 0.875rem;
   cursor: pointer;
@@ -425,7 +432,7 @@ const formatTime = (dateString) => {
 }
 
 .prompt-btn:hover {
-  border-color: #4361ee;
+  border-color: var(--color-primary);
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
@@ -454,7 +461,7 @@ const formatTime = (dateString) => {
 }
 
 .message.user .message-content {
-  background: linear-gradient(135deg, #4361ee 0%, #4cc9f0 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   color: white;
 }
 
@@ -504,7 +511,7 @@ const formatTime = (dateString) => {
 
 .input-area {
   background: white;
-  border-top: 1px solid #dee2e6;
+  border-top: 1px solid var(--color-gray-200);
   padding: 1.5rem;
 }
 
@@ -518,7 +525,7 @@ const formatTime = (dateString) => {
 .message-input {
   flex: 1;
   padding: 1rem 1.25rem;
-  border: 2px solid #dee2e6;
+  border: 2px solid var(--color-gray-200);
   border-radius: 24px;
   font-size: 1rem;
   transition: all 0.3s ease;
@@ -526,7 +533,7 @@ const formatTime = (dateString) => {
 
 .message-input:focus {
   outline: none;
-  border-color: #4361ee;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
 }
 
@@ -534,7 +541,7 @@ const formatTime = (dateString) => {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4361ee 0%, #4cc9f0 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   border: none;
   cursor: pointer;
   display: flex;

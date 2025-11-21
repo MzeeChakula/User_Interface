@@ -2,13 +2,13 @@
   <div class="loader-container">
     <div class="icon-animation">
       <div class="icon-wrapper" :class="{ active: activeIcon === 0 }">
-        <span class="icon">🍽️</span>
+        <Utensils :size="48" :stroke-width="2" />
       </div>
       <div class="icon-wrapper" :class="{ active: activeIcon === 1 }">
-        <span class="icon">🏥</span>
+        <Heart :size="48" :stroke-width="2" />
       </div>
       <div class="icon-wrapper" :class="{ active: activeIcon === 2 }">
-        <span class="icon">👥</span>
+        <Users :size="48" :stroke-width="2" />
       </div>
     </div>
     <p class="loading-text">{{ message }}</p>
@@ -17,6 +17,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { Utensils, Heart, Users } from 'lucide-vue-next'
 
 defineProps({
   message: {
@@ -48,12 +49,13 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: var(--color-white);
+  width: 100%;
 }
 
 .icon-animation {
   display: flex;
-  gap: 1.5rem;
+  gap: 2rem;
   margin-bottom: 2rem;
 }
 
@@ -61,21 +63,18 @@ onUnmounted(() => {
   opacity: 0.3;
   transform: scale(0.8);
   transition: all 0.4s ease;
+  color: var(--color-gray-400);
 }
 
 .icon-wrapper.active {
   opacity: 1;
   transform: scale(1.2);
-}
-
-.icon {
-  font-size: 3rem;
-  display: block;
+  color: var(--color-primary);
 }
 
 .loading-text {
   font-size: 1rem;
-  color: #6c757d;
+  color: var(--color-gray-600);
   font-weight: 500;
   animation: pulse 1.5s ease-in-out infinite;
 }
@@ -86,6 +85,12 @@ onUnmounted(() => {
   }
   50% {
     opacity: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .icon-animation {
+    gap: 1.5rem;
   }
 }
 </style>

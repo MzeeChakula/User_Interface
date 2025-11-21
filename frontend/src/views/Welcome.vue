@@ -1,7 +1,7 @@
 <template>
   <div class="welcome-container">
     <div class="logo-section">
-      <img src="/icons/logo.svg" alt="Mzee Chakula Logo" class="logo" />
+      <img src="/icons/logotransparent.svg" alt="Mzee Chakula Logo" class="logo" />
       <h1 class="app-title">Mzee Chakula</h1>
     </div>
 
@@ -13,7 +13,9 @@
           class="tutorial-card"
           :class="{ active: currentCard === index }"
         >
-          <div class="card-icon">{{ card.icon }}</div>
+          <div class="card-icon">
+            <component :is="card.icon" :size="64" :stroke-width="1.5" />
+          </div>
           <h2 class="card-title">{{ card.title }}</h2>
           <p class="card-description">{{ card.description }}</p>
         </div>
@@ -54,6 +56,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '../stores/app'
+import { MessageCircle, History, UserCircle, Wifi } from 'lucide-vue-next'
 
 const router = useRouter()
 const appStore = useAppStore()
@@ -62,22 +65,22 @@ const currentCard = ref(0)
 
 const tutorialCards = [
   {
-    icon: '💬',
+    icon: MessageCircle,
     title: 'Chat to Get a Plan',
     description: 'Have a natural conversation about nutritional needs, health conditions, and preferences to receive personalized meal plans.'
   },
   {
-    icon: '📋',
+    icon: History,
     title: 'View Your History',
     description: 'Access all your past conversations and meal plans anytime. Your recommendations are saved for easy reference.'
   },
   {
-    icon: '👤',
+    icon: UserCircle,
     title: 'Update Your Profile',
     description: 'Customize the elder\'s profile with age, health conditions, dietary preferences, and location for better recommendations.'
   },
   {
-    icon: '🌍',
+    icon: Wifi,
     title: 'Works Offline',
     description: 'Use the app even without internet. Your data is saved locally and synced when you\'re back online.'
   }
@@ -108,7 +111,8 @@ const getStarted = () => {
   align-items: center;
   justify-content: space-between;
   padding: 2rem 1.5rem;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: var(--color-white);
+  width: 100%;
 }
 
 .logo-section {
@@ -125,7 +129,7 @@ const getStarted = () => {
 .app-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #2d6a4f;
+  color: var(--color-primary);
   margin: 0;
 }
 
@@ -142,14 +146,14 @@ const getStarted = () => {
 .cards-wrapper {
   position: relative;
   width: 100%;
-  height: 300px;
+  height: 320px;
   margin-bottom: 2rem;
 }
 
 .tutorial-card {
   position: absolute;
   width: 100%;
-  background: white;
+  background: var(--color-white);
   border-radius: 20px;
   padding: 2.5rem 2rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -158,29 +162,31 @@ const getStarted = () => {
   transform: translateX(50px);
   pointer-events: none;
   transition: all 0.4s ease;
+  border: 2px solid var(--color-gray-200);
 }
 
 .tutorial-card.active {
   opacity: 1;
   transform: translateX(0);
   pointer-events: auto;
+  border-color: var(--color-primary);
 }
 
 .card-icon {
-  font-size: 4rem;
   margin-bottom: 1.5rem;
+  color: var(--color-primary);
 }
 
 .card-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #212529;
+  color: var(--color-dark);
   margin-bottom: 1rem;
 }
 
 .card-description {
   font-size: 1rem;
-  color: #6c757d;
+  color: var(--color-gray-600);
   line-height: 1.6;
 }
 
@@ -194,13 +200,13 @@ const getStarted = () => {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #dee2e6;
+  background: var(--color-gray-300);
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .dot.active {
-  background: #4361ee;
+  background: var(--color-primary);
   transform: scale(1.2);
 }
 
@@ -223,21 +229,63 @@ const getStarted = () => {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #4361ee 0%, #4cc9f0 100%);
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-white);
 }
 
 .btn-primary:hover {
+  background: var(--color-primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(67, 97, 238, 0.3);
+  box-shadow: 0 5px 20px rgba(217, 0, 0, 0.3);
 }
 
 .btn-text {
   background: transparent;
-  color: #6c757d;
+  color: var(--color-gray-600);
 }
 
 .btn-text:hover {
-  color: #4361ee;
+  color: var(--color-primary);
+}
+
+@media (max-width: 768px) {
+  .welcome-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .logo {
+    width: 100px;
+    height: 100px;
+  }
+
+  .app-title {
+    font-size: 1.75rem;
+  }
+
+  .tutorial-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .cards-wrapper {
+    height: 340px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-section {
+    margin-top: 1rem;
+  }
+
+  .tutorial-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .card-title {
+    font-size: 1.25rem;
+  }
+
+  .card-description {
+    font-size: 0.875rem;
+  }
 }
 </style>
