@@ -1,79 +1,96 @@
 <template>
   <div class="auth-container">
-    <div class="auth-card">
-      <div class="header">
-        <img src="/icons/logotransparent.svg" alt="Mzee Chakula" class="logo" />
-        <h1 class="title">{{ isSignUp ? 'Create Account' : 'Welcome Back' }}</h1>
-        <p class="subtitle">{{ isSignUp ? 'Sign up to get started' : 'Sign in to continue' }}</p>
-      </div>
-
-      <div class="auth-methods">
-        <button class="auth-btn google-btn" @click="handleGoogleAuth">
-          <Lock class="btn-icon" :size="20" />
-          {{ isSignUp ? 'Sign up with Google' : 'Sign in with Google' }}
-        </button>
-
-        <button class="auth-btn phone-btn" @click="handlePhoneAuth">
-          <Smartphone class="btn-icon" :size="20" />
-          {{ isSignUp ? 'Sign up with Phone' : 'Sign in with Phone' }}
-        </button>
-      </div>
-
-      <div class="divider">
-        <span>or</span>
-      </div>
-
-      <form @submit.prevent="handleEmailAuth" class="email-form">
-        <div class="form-group" v-if="isSignUp">
-          <label for="name">Name</label>
-          <input
-            v-model="formData.name"
-            type="text"
-            id="name"
-            placeholder="Enter your name"
-            required
-          />
+    <div class="auth-grid">
+      <!-- Left Column - Branding -->
+      <div class="branding-column">
+        <div class="branding-content">
+          <img src="/icons/logotransparent.svg" alt="Mzee Chakula" class="logo" />
+          <h1 class="brand-title">Mzee Chakula</h1>
+          <p class="brand-subtitle">Nourishing our Elders, Together</p>
+          <p class="brand-description">
+            AI-powered nutritional assistant designed for elderly care in Uganda.
+            Get personalized meal plans based on health conditions and locally available foods.
+          </p>
         </div>
-
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input
-            v-model="formData.email"
-            type="email"
-            id="email"
-            placeholder="Enter your email"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input
-            v-model="formData.password"
-            type="password"
-            id="password"
-            placeholder="Enter your password"
-            required
-          />
-        </div>
-
-        <button type="submit" class="submit-btn" :disabled="loading">
-          {{ loading ? 'Please wait...' : (isSignUp ? 'Sign Up' : 'Sign In') }}
-        </button>
-      </form>
-
-      <div class="toggle-mode">
-        <p>
-          {{ isSignUp ? 'Already have an account?' : "Don't have an account?" }}
-          <button @click="toggleMode" class="toggle-btn">
-            {{ isSignUp ? 'Sign In' : 'Sign Up' }}
-          </button>
-        </p>
       </div>
 
-      <div v-if="!isOnline" class="offline-notice">
-        <WifiOff class="offline-icon" :size="20" />
-        You're offline. Sign in will be available when you're back online.
+      <!-- Right Column - Auth Form -->
+      <div class="form-column">
+        <div class="auth-card">
+          <div class="header">
+            <h2 class="title">{{ isSignUp ? 'Create Account' : 'Welcome Back' }}</h2>
+            <p class="subtitle">{{ isSignUp ? 'Sign up to get started' : 'Sign in to continue' }}</p>
+          </div>
+
+          <div class="auth-methods">
+            <button class="auth-btn google-btn" @click="handleGoogleAuth">
+              <img src="/icons/google.png" alt="Google" class="google-icon" />
+              <span>{{ isSignUp ? 'Google' : 'Google' }}</span>
+            </button>
+
+            <button class="auth-btn phone-btn" @click="handlePhoneAuth">
+              <Smartphone class="btn-icon" :size="24" />
+              <span>{{ isSignUp ? 'Phone' : 'Phone' }}</span>
+            </button>
+          </div>
+
+          <div class="divider">
+            <span>or</span>
+          </div>
+
+          <form @submit.prevent="handleEmailAuth" class="email-form">
+            <div class="form-group" v-if="isSignUp">
+              <label for="name">Name</label>
+              <input
+                v-model="formData.name"
+                type="text"
+                id="name"
+                placeholder="Enter your name"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input
+                v-model="formData.email"
+                type="email"
+                id="email"
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input
+                v-model="formData.password"
+                type="password"
+                id="password"
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+
+            <button type="submit" class="submit-btn" :disabled="loading">
+              {{ loading ? 'Please wait...' : (isSignUp ? 'Sign Up' : 'Sign In') }}
+            </button>
+          </form>
+
+          <div class="toggle-mode">
+            <p>
+              {{ isSignUp ? 'Already have an account?' : "Don't have an account?" }}
+              <button @click="toggleMode" class="toggle-btn">
+                {{ isSignUp ? 'Sign In' : 'Sign Up' }}
+              </button>
+            </p>
+          </div>
+
+          <div v-if="!isOnline" class="offline-notice">
+            <WifiOff class="offline-icon" :size="20" />
+            You're offline. Sign in will be available when you're back online.
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -84,7 +101,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useOnlineStatus } from '../composables/useOnlineStatus'
-import { Lock, Smartphone, WifiOff } from 'lucide-vue-next'
+import { Smartphone, WifiOff } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -133,16 +150,86 @@ const handlePhoneAuth = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem 1.5rem;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  background: var(--color-white);
   width: 100%;
+  overflow: hidden;
+}
+
+.auth-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  height: 100vh;
+}
+
+/* Left Column - Branding */
+.branding-column {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.branding-column::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(252, 220, 4, 0.1) 0%, transparent 70%);
+}
+
+.branding-content {
+  text-align: center;
+  z-index: 1;
+  max-width: 500px;
+}
+
+.logo {
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 2rem auto;
+  display: block;
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+}
+
+.brand-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--color-white);
+  margin-bottom: 1rem;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.brand-subtitle {
+  font-size: 1.5rem;
+  color: var(--color-secondary);
+  margin-bottom: 2rem;
+  font-weight: 600;
+}
+
+.brand-description {
+  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.8;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Right Column - Form */
+.form-column {
+  background: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  overflow-y: auto;
 }
 
 .auth-card {
-  background: var(--color-white);
-  border-radius: 24px;
-  padding: 2.5rem 2rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   width: 100%;
   max-width: 450px;
 }
@@ -150,12 +237,6 @@ const handlePhoneAuth = () => {
 .header {
   text-align: center;
   margin-bottom: 2rem;
-}
-
-.logo {
-  width: 80px;
-  height: 80px;
-  margin-bottom: 1rem;
 }
 
 .title {
@@ -171,20 +252,21 @@ const handlePhoneAuth = () => {
 }
 
 .auth-methods {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
 .auth-btn {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  padding: 1rem;
+  gap: 0.5rem;
+  padding: 1rem 0.5rem;
   border-radius: 12px;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -200,7 +282,13 @@ const handlePhoneAuth = () => {
 }
 
 .btn-icon {
-  font-size: 1.25rem;
+  color: var(--color-primary);
+}
+
+.google-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .divider {
@@ -309,7 +397,6 @@ const handlePhoneAuth = () => {
 .offline-notice {
   margin-top: 1.5rem;
   padding: 1rem;
-  background: var(--color-warning);
   background: #FFF3CD;
   border-radius: 10px;
   text-align: center;
@@ -322,35 +409,45 @@ const handlePhoneAuth = () => {
 }
 
 .offline-icon {
-  font-size: 1.25rem;
+  flex-shrink: 0;
 }
 
-@media (max-width: 768px) {
-  .auth-container {
+/* Responsive */
+@media (max-width: 1024px) {
+  .auth-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .branding-column {
+    display: none;
+  }
+
+  .form-column {
+    padding: 2rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-column {
     padding: 1.5rem 1rem;
   }
 
   .auth-card {
-    padding: 2rem 1.5rem;
-  }
-
-  .logo {
-    width: 70px;
-    height: 70px;
+    max-width: 100%;
   }
 
   .title {
     font-size: 1.5rem;
   }
-}
 
-@media (max-width: 480px) {
-  .auth-card {
-    padding: 1.5rem 1rem;
+  .auth-methods {
+    grid-template-columns: 1fr;
   }
 
-  .header {
-    margin-bottom: 1.5rem;
+  .auth-btn {
+    flex-direction: row;
+    font-size: 1rem;
+    padding: 1rem;
   }
 }
 </style>

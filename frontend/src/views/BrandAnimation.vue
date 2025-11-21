@@ -1,12 +1,36 @@
 <template>
   <div class="brand-animation-container">
     <div class="animation-wrapper">
-      <!-- Color waves -->
-      <div class="color-waves">
-        <div ref="wave1" class="wave wave-1"></div>
-        <div ref="wave2" class="wave wave-2"></div>
-        <div ref="wave3" class="wave wave-3"></div>
-      </div>
+      <!-- Animated Wave SVGs -->
+      <svg class="wave-svg wave-svg-1" ref="wave1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+        <path fill="url(#gradient1)" d="M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,149.3C672,139,768,149,864,170.7C960,192,1056,224,1152,224C1248,224,1344,192,1392,176L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        <defs>
+          <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#D90000;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#B00000;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+      </svg>
+
+      <svg class="wave-svg wave-svg-2" ref="wave2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+        <path fill="url(#gradient2)" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,133.3C672,117,768,107,864,122.7C960,139,1056,181,1152,186.7C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        <defs>
+          <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#FCDC04;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#E6C804;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+      </svg>
+
+      <svg class="wave-svg wave-svg-3" ref="wave3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+        <path fill="url(#gradient3)" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,208C672,213,768,203,864,192C960,181,1056,171,1152,165.3C1248,160,1344,160,1392,160L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        <defs>
+          <linearGradient id="gradient3" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#1E1E1E;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#2A2A2A;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+      </svg>
 
       <!-- Brand content -->
       <div class="brand-content">
@@ -43,7 +67,7 @@ onMounted(() => {
 
   // Set initial states
   gsap.set([wave1.value, wave2.value, wave3.value], {
-    x: '-100%',
+    y: '100%',
     opacity: 0
   })
 
@@ -53,26 +77,26 @@ onMounted(() => {
     y: 20
   })
 
-  // Animate waves sliding in with stagger
+  // Animate waves flowing up with stagger
   timeline
     .to(wave1.value, {
-      x: '0%',
+      y: '0%',
       opacity: 1,
-      duration: 0.8,
-      ease: 'power3.out'
+      duration: 1,
+      ease: 'power2.out'
     })
     .to(wave2.value, {
-      x: '0%',
-      opacity: 1,
-      duration: 0.8,
-      ease: 'power3.out'
-    }, '-=0.6')
+      y: '0%',
+      opacity: 0.9,
+      duration: 1.2,
+      ease: 'power2.out'
+    }, '-=0.7')
     .to(wave3.value, {
-      x: '0%',
-      opacity: 1,
-      duration: 0.8,
-      ease: 'power3.out'
-    }, '-=0.6')
+      y: '0%',
+      opacity: 0.8,
+      duration: 1.4,
+      ease: 'power2.out'
+    }, '-=0.9')
     // Animate brand name
     .to(brandName.value, {
       opacity: 1,
@@ -124,31 +148,57 @@ onMounted(() => {
   justify-content: center;
 }
 
-.color-waves {
+.wave-svg {
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.wave {
-  flex: 1;
   will-change: transform, opacity;
 }
 
-.wave-1 {
-  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+.wave-svg-1 {
+  z-index: 3;
+  animation: wave-float-1 6s ease-in-out infinite;
 }
 
-.wave-2 {
-  background: linear-gradient(90deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
+.wave-svg-2 {
+  z-index: 2;
+  animation: wave-float-2 7s ease-in-out infinite;
+  animation-delay: 0.5s;
 }
 
-.wave-3 {
-  background: linear-gradient(90deg, var(--color-dark) 0%, var(--color-dark-lighter) 100%);
+.wave-svg-3 {
+  z-index: 1;
+  animation: wave-float-3 8s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+@keyframes wave-float-1 {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  50% {
+    transform: translateY(-15px) translateX(10px);
+  }
+}
+
+@keyframes wave-float-2 {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  50% {
+    transform: translateY(-20px) translateX(-10px);
+  }
+}
+
+@keyframes wave-float-3 {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  50% {
+    transform: translateY(-10px) translateX(15px);
+  }
 }
 
 .brand-content {

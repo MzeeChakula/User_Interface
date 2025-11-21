@@ -7,8 +7,11 @@
     </header>
 
     <div class="settings-content">
-      <!-- Language Settings -->
-      <section class="settings-section">
+      <div class="settings-grid">
+        <!-- Left Column -->
+        <div class="settings-column">
+          <!-- Language Settings -->
+          <section class="settings-section">
         <h2 class="section-title">Language Preferences</h2>
         <div class="setting-item">
           <div class="setting-info">
@@ -70,9 +73,12 @@
           <span class="info-value">{{ storageUsed }} KB</span>
         </div>
       </section>
+        </div>
 
-      <!-- Help & Support -->
-      <section class="settings-section">
+        <!-- Right Column -->
+        <div class="settings-column">
+          <!-- Help & Support -->
+          <section class="settings-section">
         <h2 class="section-title">Help & Support</h2>
         <button @click="showFAQ" class="action-btn">
           <HelpCircle class="btn-icon" :size="20" />
@@ -111,12 +117,14 @@
           <span>Clear All Conversations</span>
         </button>
       </section>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '../stores/app'
 import { useAuthStore } from '../stores/auth'
@@ -203,7 +211,7 @@ const clearConversations = () => {
 <style scoped>
 .settings-container {
   min-height: 100vh;
-  background: var(--color-gray-50);
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
 .settings-header {
@@ -242,8 +250,17 @@ const clearConversations = () => {
 
 .settings-content {
   padding: 1.5rem;
-  max-width: 800px;
+  max-width: 1400px;
   margin: 0 auto;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.settings-column {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -251,18 +268,28 @@ const clearConversations = () => {
 
 .settings-section {
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(217, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.settings-section:hover {
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
 }
 
 .section-title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #212529;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 1rem 0;
   padding-bottom: 0.75rem;
-  border-bottom: 2px solid var(--color-gray-50);
+  border-bottom: 2px solid var(--color-gray-100);
 }
 
 .setting-item {
@@ -323,7 +350,7 @@ const clearConversations = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background: linear-gradient(135deg, #ccc 0%, #aaa 100%);
   transition: 0.3s;
   border-radius: 28px;
 }
@@ -341,7 +368,7 @@ const clearConversations = () => {
 }
 
 input:checked + .toggle-slider {
-  background-color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
 }
 
 input:checked + .toggle-slider:before {
@@ -379,14 +406,15 @@ input:checked + .toggle-slider:before {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   border: 2px solid var(--color-gray-200);
-  border-radius: 10px;
-  background: white;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   font-size: 1rem;
   margin-bottom: 0.75rem;
+  font-weight: 500;
 }
 
 .action-btn:last-child {
@@ -395,8 +423,9 @@ input:checked + .toggle-slider:before {
 
 .action-btn:hover {
   border-color: var(--color-primary);
-  background: var(--color-gray-50);
-  transform: translateX(5px);
+  background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
+  transform: translateX(8px);
+  box-shadow: 0 5px 15px rgba(217, 0, 0, 0.1);
 }
 
 .action-btn.danger {
@@ -418,6 +447,12 @@ input:checked + .toggle-slider:before {
   color: #6c757d;
 }
 
+@media (max-width: 1024px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
   .settings-content {
     padding: 1rem;
@@ -425,6 +460,10 @@ input:checked + .toggle-slider:before {
 
   .settings-section {
     padding: 1rem;
+  }
+
+  .settings-grid {
+    gap: 1.5rem;
   }
 }
 </style>

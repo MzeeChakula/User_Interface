@@ -1,62 +1,72 @@
 <template>
   <div class="welcome-container">
-    <div class="logo-section">
-      <img src="/icons/logotransparent.svg" alt="Mzee Chakula Logo" class="logo" />
-      <h1 class="app-title">Mzee Chakula</h1>
-    </div>
+    <div class="welcome-grid">
+      <!-- Left Column - Branding -->
+      <div class="brand-column">
+        <img src="/icons/logotransparent.svg" alt="Mzee Chakula Logo" class="logo" />
+        <h1 class="app-title">Mzee Chakula</h1>
+        <p class="app-subtitle">Nourishing our Elders, Together</p>
+      </div>
 
-    <div class="tutorial-section">
-      <div class="cards-wrapper">
-        <div
-          v-for="(card, index) in tutorialCards"
-          :key="index"
-          class="tutorial-card"
-          :class="{ active: currentCard === index }"
-        >
-          <div class="card-icon">
-            <component :is="card.icon" :size="64" :stroke-width="1.5" />
+      <!-- Right Column - Tutorial Cards -->
+      <div class="tutorial-column">
+        <div class="tutorial-content">
+          <h2 class="tutorial-header">Get Started</h2>
+
+          <div class="tutorial-cards">
+            <div
+              v-for="(card, index) in tutorialCards"
+              :key="index"
+              class="tutorial-card"
+              :class="{ active: currentCard === index }"
+            >
+              <div class="card-icon">
+                <component :is="card.icon" :size="80" :stroke-width="1.5" />
+              </div>
+              <h3 class="card-title">{{ card.title }}</h3>
+              <p class="card-description">{{ card.description }}</p>
+            </div>
           </div>
-          <h2 class="card-title">{{ card.title }}</h2>
-          <p class="card-description">{{ card.description }}</p>
+
+          <div class="progress-dots">
+            <span
+              v-for="(card, index) in tutorialCards"
+              :key="index"
+              class="dot"
+              :class="{ active: currentCard === index }"
+              @click="currentCard = index"
+            ></span>
+          </div>
+
+          <div class="actions">
+            <button
+              v-if="currentCard < tutorialCards.length - 1"
+              @click="nextCard"
+              class="btn btn-primary"
+            >
+              Next
+            </button>
+            <button
+              v-else
+              @click="getStarted"
+              class="btn btn-primary"
+            >
+              Get Started
+            </button>
+            <button @click="skip" class="btn btn-text">Skip Tutorial</button>
+          </div>
         </div>
       </div>
-
-      <div class="progress-dots">
-        <span
-          v-for="(card, index) in tutorialCards"
-          :key="index"
-          class="dot"
-          :class="{ active: currentCard === index }"
-          @click="currentCard = index"
-        ></span>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button
-        v-if="currentCard < tutorialCards.length - 1"
-        @click="nextCard"
-        class="btn btn-primary"
-      >
-        Next
-      </button>
-      <button
-        v-else
-        @click="getStarted"
-        class="btn btn-primary"
-      >
-        Get Started
-      </button>
-      <button @click="skip" class="btn btn-text">Skip Tutorial</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '../stores/app'
 import { MessageCircle, History, UserCircle, Wifi } from 'lucide-vue-next'
+import gsap from 'gsap'
 
 const router = useRouter()
 const appStore = useAppStore()
@@ -86,6 +96,23 @@ const tutorialCards = [
   }
 ]
 
+onMounted(() => {
+  gsap.from('.app-title', {
+    duration: 1,
+    y: -30,
+    opacity: 0,
+    ease: 'back.out(1.7)'
+  })
+
+  gsap.from('.app-subtitle', {
+    duration: 0.8,
+    y: 20,
+    opacity: 0,
+    delay: 0.3,
+    ease: 'power2.out'
+  })
+})
+
 const nextCard = () => {
   if (currentCard.value < tutorialCards.length - 1) {
     currentCard.value++
@@ -107,46 +134,95 @@ const getStarted = () => {
 .welcome-container {
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  padding: 2rem 1.5rem;
-  background: var(--color-white);
+  justify-content: center;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   width: 100%;
+  overflow: hidden;
 }
 
-.logo-section {
-  text-align: center;
-  margin-top: 2rem;
+.welcome-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  width: 100%;
+  height: 100vh;
 }
 
-.logo {
-  width: 120px;
-  height: 120px;
-  margin-bottom: 1rem;
-}
-
-.app-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-primary);
-  margin: 0;
-}
-
-.tutorial-section {
-  flex: 1;
+/* Left Column - Branding */
+.brand-column {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  max-width: 500px;
+  padding: 3rem;
+  position: relative;
+  overflow: hidden;
 }
 
-.cards-wrapper {
-  position: relative;
+.brand-column::before {
+  content: '';
+  position: absolute;
+  bottom: -50%;
+  left: -50%;
+  width: 150%;
+  height: 150%;
+  background: radial-gradient(circle, rgba(252, 220, 4, 0.15) 0%, transparent 60%);
+}
+
+.logo {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 2rem auto;
+  display: block;
+  filter: drop-shadow(0 10px 40px rgba(0, 0, 0, 0.3));
+  z-index: 1;
+}
+
+.app-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: var(--color-white);
+  margin-bottom: 1rem;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  text-align: center;
+}
+
+.app-subtitle {
+  font-size: 1.5rem;
+  color: var(--color-secondary);
+  font-weight: 600;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  text-align: center;
+}
+
+/* Right Column - Tutorial */
+.tutorial-column {
+  background: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+}
+
+.tutorial-content {
   width: 100%;
-  height: 320px;
+  max-width: 600px;
+}
+
+.tutorial-header {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-dark);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.tutorial-cards {
+  position: relative;
+  height: 380px;
   margin-bottom: 2rem;
 }
 
@@ -155,7 +231,7 @@ const getStarted = () => {
   width: 100%;
   background: var(--color-white);
   border-radius: 20px;
-  padding: 2.5rem 2rem;
+  padding: 2rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   text-align: center;
   opacity: 0;
@@ -175,6 +251,9 @@ const getStarted = () => {
 .card-icon {
   margin-bottom: 1.5rem;
   color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .card-title {
@@ -194,6 +273,7 @@ const getStarted = () => {
   display: flex;
   gap: 0.75rem;
   margin-bottom: 2rem;
+  justify-content: center;
 }
 
 .dot {
@@ -207,12 +287,10 @@ const getStarted = () => {
 
 .dot.active {
   background: var(--color-primary);
-  transform: scale(1.2);
+  transform: scale(1.3);
 }
 
 .actions {
-  width: 100%;
-  max-width: 400px;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -248,34 +326,64 @@ const getStarted = () => {
   color: var(--color-primary);
 }
 
+/* Responsive */
+@media (max-width: 1024px) {
+  .welcome-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-column {
+    height: 40vh;
+    padding: 2rem;
+  }
+
+  .logo {
+    width: 120px;
+    height: 120px;
+  }
+
+  .app-title {
+    font-size: 2.5rem;
+  }
+
+  .app-subtitle {
+    font-size: 1.25rem;
+  }
+
+  .tutorial-column {
+    height: 60vh;
+  }
+}
+
 @media (max-width: 768px) {
-  .welcome-container {
-    padding: 1.5rem 1rem;
+  .brand-column {
+    padding: 1.5rem;
   }
 
   .logo {
     width: 100px;
     height: 100px;
+    margin-bottom: 1rem;
   }
 
   .app-title {
-    font-size: 1.75rem;
+    font-size: 2rem;
   }
 
-  .tutorial-card {
+  .app-subtitle {
+    font-size: 1rem;
+  }
+
+  .tutorial-column {
     padding: 2rem 1.5rem;
   }
 
-  .cards-wrapper {
-    height: 340px;
+  .tutorial-cards {
+    height: 400px;
   }
 }
 
 @media (max-width: 480px) {
-  .logo-section {
-    margin-top: 1rem;
-  }
-
   .tutorial-card {
     padding: 1.5rem 1rem;
   }
