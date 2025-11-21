@@ -116,7 +116,7 @@ class ModelLoader:
                 'test_mae': 2.84,
                 'available': True
             }
-            logger.info("✅ Loaded local XGBoost model")
+            logger.info("Loaded local XGBoost model")
         except Exception as e:
             logger.warning(f"Could not load local XGBoost: {e}")
             self.models['local_xgboost'] = {'available': False}
