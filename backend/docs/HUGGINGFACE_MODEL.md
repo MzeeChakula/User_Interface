@@ -49,24 +49,27 @@ curl -X POST "http://localhost:8000/predict" \
 ### Model Priority
 
 When using `"model": "auto"`, the system prioritizes:
+
 1. **HuggingFace Ensemble** - Best accuracy (requires internet)
 2. **Local Fallback** - Works offline
 
 ## Files Updated
 
-- ✅ `api/models/loader.py` - Model loading logic
-- ✅ `api/core/config.py` - Configuration settings
-- ✅ `api/main.py` - API metadata
-- ✅ `api/routers/predict.py` - Prediction endpoint documentation
+- `api/models/loader.py` - Model loading logic
+- `api/core/config.py` - Configuration settings
+- `api/main.py` - API metadata
+- `api/routers/predict.py` - Prediction endpoint documentation
 
 ## Verification
 
 Check model status:
+
 ```bash
 curl http://localhost:8000/health
 ```
 
 The response will show:
+
 ```json
 {
   "huggingface_model": {

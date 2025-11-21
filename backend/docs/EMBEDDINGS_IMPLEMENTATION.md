@@ -1,6 +1,7 @@
 # HuggingFace Embeddings Implementation Summary
 
 ## Overview
+
 Successfully implemented HuggingFace embeddings support for food recommendations, replicating the Model-Testing backend approach.
 
 ## Changes Made
@@ -8,11 +9,13 @@ Successfully implemented HuggingFace embeddings support for food recommendations
 ### 1. Model Loader (`api/models/loader.py`)
 
 **Updated Imports:**
+
 ```python
 from huggingface_hub import snapshot_download, hf_hub_download
 ```
 
 **Enhanced `_load_hf_model()` Method:**
+
 - Uses `snapshot_download()` to download entire HF repo
 - Searches for embeddings files (JSON/NPY) with "embedd" in filename
 - Loads metadata files with "meta", "items", or "foods" in filename
@@ -20,6 +23,7 @@ from huggingface_hub import snapshot_download, hf_hub_download
 - Stores embeddings in `self.models['ensemble']`
 
 **Added `recommend_foods()` Method:**
+
 - Accepts `query_vector` or `by_id` parameter
 - Performs cosine similarity search via dot product
 - Returns top-k similar items with scores and metadata
@@ -28,11 +32,13 @@ from huggingface_hub import snapshot_download, hf_hub_download
 ### 2. Predict Router (`api/routers/predict.py`)
 
 **Added Import:**
+
 ```python
 from fastapi import Query
 ```
 
 **New `/predict/recommend` Endpoint:**
+
 - GET endpoint for food recommendations
 - Parameters:
   - `by_id`: Find similar foods to a specific item
@@ -43,11 +49,13 @@ from fastapi import Query
 ## API Usage
 
 ### Find Similar Foods by ID
+
 ```bash
 GET /predict/recommend?by_id=12345&top_k=10
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -67,6 +75,7 @@ GET /predict/recommend?by_id=12345&top_k=10
 ```
 
 ### Find Similar Foods by Vector
+
 ```bash
 GET /predict/recommend?vector=0.1,0.2,0.3,0.4&top_k=5
 ```
@@ -96,16 +105,17 @@ The implementation expects your `Shakiran/MzeeChakulaNutritionEnsembleModel` rep
 
 ## Features
 
-✅ **Snapshot Download** - Downloads full repo for offline use
-✅ **Flexible Format** - Supports JSON and NPY embeddings
-✅ **Metadata Support** - Rich food information in responses
-✅ **Cosine Similarity** - Normalized embeddings for accurate search
-✅ **Error Handling** - Graceful fallbacks and error messages
-✅ **Fast Search** - Optimized dot product similarity
+**Snapshot Download** - Downloads full repo for offline use
+**Flexible Format** - Supports JSON and NPY embeddings
+**Metadata Support** - Rich food information in responses
+**Cosine Similarity** - Normalized embeddings for accurate search
+**Error Handling** - Graceful fallbacks and error messages
+**Fast Search** - Optimized dot product similarity
 
 ## Testing
 
 Test the endpoint:
+
 ```bash
 # Check if embeddings loaded
 curl http://localhost:8000/health
