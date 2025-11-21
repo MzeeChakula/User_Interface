@@ -1,30 +1,62 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { authAPI } from '../api'
 
 export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(false)
   const user = ref(null)
   const token = ref(localStorage.getItem('auth_token') || null)
+  const loading = ref(false)
+  const error = ref(null)
+
+  const register = async (userData) => {
+    loading.value = true
+    error.value = null
+    try {
+      await authAPI.register(userData)
+
+      // After registration, log the user in
+      return await login({ email: userData.email, password: userData.password })
+    } catch (err) {
+      console.error('Registration error:', err)
+      error.value = err.response?.data?.detail || 'Registration failed'
+      return { success: false, error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
 
   const login = async (credentials) => {
+    loading.value = true
+    error.value = null
     try {
-      // TODO: Replace with actual API call
-      // const response = await api.post('/auth/login', credentials)
+      const response = await authAPI.login(credentials)
 
-      // Mock login for now
-      isAuthenticated.value = true
-      user.value = {
-        id: '1',
-        name: credentials.name || 'User',
-        email: credentials.email
-      }
-      token.value = 'mock_token'
+      token.value = response.access_token
       localStorage.setItem('auth_token', token.value)
+      isAuthenticated.value = true
+
+      // Fetch user data
+      await fetchUser()
 
       return { success: true }
-    } catch (error) {
-      console.error('Login error:', error)
-      return { success: false, error }
+    } catch (err) {
+      console.error('Login error:', err)
+      error.value = err.response?.data?.detail || 'Login failed'
+      return { success: false, error: error.value }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const fetchUser = async () => {
+    try {
+      const userData = await authAPI.getCurrentUser()
+      user.value = userData
+    } catch (err) {
+      console.error('Fetch user error:', err)
+      // If fetching user fails, clear auth
+      logout()
     }
   }
 
@@ -35,12 +67,18 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('auth_token')
   }
 
-  const checkAuth = () => {
+  const checkAuth = async () => {
     const storedToken = localStorage.getItem('auth_token')
     if (storedToken) {
       token.value = storedToken
       isAuthenticated.value = true
-      // TODO: Verify token with backend
+      // Verify token with backend by fetching user
+      try {
+        await fetchUser()
+      } catch (err) {
+        // Token is invalid, clear auth
+        logout()
+      }
     }
   }
 
@@ -48,8 +86,12 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     user,
     token,
+    loading,
+    error,
+    register,
     login,
     logout,
-    checkAuth
+    checkAuth,
+    fetchUser
   }
 })

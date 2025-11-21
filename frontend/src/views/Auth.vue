@@ -124,14 +124,19 @@ const toggleMode = () => {
 const handleEmailAuth = async () => {
   loading.value = true
 
-  const result = await authStore.login(formData.value)
+  let result
+  if (isSignUp.value) {
+    result = await authStore.register(formData.value)
+  } else {
+    result = await authStore.login(formData.value)
+  }
 
   loading.value = false
 
   if (result.success) {
     router.push({ name: 'Chat' })
   } else {
-    alert('Authentication failed. Please try again.')
+    alert(result.error || 'Authentication failed. Please try again.')
   }
 }
 

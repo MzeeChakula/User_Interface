@@ -282,31 +282,20 @@ const usePrompt = (prompt) => {
 const sendMessage = async () => {
   if (!messageInput.value.trim()) return
 
-  const userMessage = {
-    role: 'user',
-    content: messageInput.value
-  }
-
-  chatStore.addMessage(userMessage)
+  const message = messageInput.value
   messageInput.value = ''
 
   await nextTick()
   scrollToBottom()
 
-  // Simulate AI response
-  chatStore.isLoading = true
-
-  setTimeout(() => {
-    const aiResponse = {
-      role: 'assistant',
-      content: 'This is a placeholder response. The AI backend will be integrated to provide actual nutritional advice based on your query.'
-    }
-
-    chatStore.addMessage(aiResponse)
-    chatStore.isLoading = false
-
-    nextTick(() => scrollToBottom())
-  }, 1500)
+  try {
+    await chatStore.sendMessage(message)
+    await nextTick()
+    scrollToBottom()
+  } catch (error) {
+    console.error('Failed to send message:', error)
+    // Error is already handled in the store
+  }
 }
 
 const scrollToBottom = () => {
