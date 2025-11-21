@@ -11,16 +11,21 @@ class LLMService:
 
     def __init__(self):
         self.api_key = os.getenv("GROQ_API_KEY")
-        if not self.api_key:
-            raise ValueError("GROQ_API_KEY not found in environment variables")
-        
-        # Initialize LangChain Groq client
-        self.llm = ChatGroq(
-            api_key=self.api_key,
-            model_name="llama-3.3-70b-versatile",
-            temperature=0.7,
-            max_tokens=1024,
-        )
+        self._llm = None
+
+    @property
+    def llm(self):
+        """Lazy load the LLM client"""
+        if self._llm is None:
+            if not self.api_key:
+                raise ValueError("GROQ_API_KEY not found in environment variables")
+            self._llm = ChatGroq(
+                api_key=self.api_key,
+                model_name="llama-3.3-70b-versatile",
+                temperature=0.7,
+                max_tokens=1024,
+            )
+        return self._llm
     
     async def generate_response(
         self,
@@ -55,4 +60,18 @@ class LLMService:
                 temperature=temperature if temperature is not None else 0.7,
                 max_tokens=max_tokens if max_tokens is not None else 1024,
             )
-llm_service = LLMService()
+
+        # Generate response
+        response = await llm.ainvoke(langchain_messages)
+        return response.content
+
+
+# Singleton pattern with lazy loading
+_llm_service_instance = None
+
+def get_llm_service() -> LLMService:
+    """Get or create the LLM service singleton instance"""
+    global _llm_service_instance
+    if _llm_service_instance is None:
+        _llm_service_instance = LLMService()
+    return _llm_service_instance
