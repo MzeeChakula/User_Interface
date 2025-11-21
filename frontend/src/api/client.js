@@ -28,7 +28,7 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !error.config.url.includes('/auth/token')) {
       // Clear auth and redirect to login
       localStorage.removeItem('auth_token')
       window.location.href = '/auth'
