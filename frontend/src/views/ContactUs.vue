@@ -21,52 +21,6 @@
 
     <div class="contact-content">
       <div class="contact-grid">
-        <!-- Contact Information Cards -->
-        <div class="contact-cards">
-          <div class="contact-card">
-            <div class="card-icon-wrapper primary">
-              <Mail :size="32" class="card-icon" />
-            </div>
-            <h3>Email Us</h3>
-            <p class="card-detail">support@mzeechakula.ug</p>
-            <p class="card-detail">info@mzeechakula.ug</p>
-            <p class="card-description">We'll respond within 24 hours</p>
-            <a href="mailto:support@mzeechakula.ug" class="card-action">Send Email</a>
-          </div>
-
-          <div class="contact-card">
-            <div class="card-icon-wrapper secondary">
-              <Phone :size="32" class="card-icon" />
-            </div>
-            <h3>Call Us</h3>
-            <p class="card-detail">+256 700 123 456</p>
-            <p class="card-detail">+256 750 987 654</p>
-            <p class="card-description">Mon-Fri: 8am - 6pm (EAT)</p>
-            <a href="tel:+256700123456" class="card-action">Call Now</a>
-          </div>
-
-          <div class="contact-card">
-            <div class="card-icon-wrapper accent">
-              <MapPin :size="32" class="card-icon" />
-            </div>
-            <h3>Visit Us</h3>
-            <p class="card-detail">Plot 123 Kampala Road</p>
-            <p class="card-detail">Kampala, Uganda</p>
-            <p class="card-description">Mon-Fri: 9am - 5pm</p>
-            <button @click="openMap" class="card-action">Get Directions</button>
-          </div>
-
-          <div class="contact-card">
-            <div class="card-icon-wrapper info">
-              <MessageCircle :size="32" class="card-icon" />
-            </div>
-            <h3>Live Chat</h3>
-            <p class="card-detail">Chat with our support team</p>
-            <p class="card-description">Available 24/7 for urgent issues</p>
-            <button @click="startChat" class="card-action">Start Chat</button>
-          </div>
-        </div>
-
         <!-- Quick Contact Form -->
         <div class="quick-contact-form">
           <h2>Send Us a Message</h2>
@@ -140,6 +94,49 @@
             <span>Message sent successfully! We'll get back to you soon.</span>
           </div>
         </div>
+
+        <!-- Contact Information Cards -->
+        <div class="contact-cards">
+          <div class="contact-card">
+            <div class="card-icon-wrapper primary">
+              <Mail :size="28" class="card-icon" />
+            </div>
+            <h3>Email Us</h3>
+            <p class="card-detail">support@mzeechakula.ug</p>
+            <p class="card-description">We'll respond within 24 hours</p>
+            <button @click="openEmail" class="card-action">Send Email</button>
+          </div>
+
+          <div class="contact-card">
+            <div class="card-icon-wrapper secondary">
+              <Phone :size="28" class="card-icon" />
+            </div>
+            <h3>Call Us</h3>
+            <p class="card-detail">+256 700 123 456</p>
+            <p class="card-description">Mon-Fri: 8am - 6pm (EAT)</p>
+            <button @click="handleCall" class="card-action">Call Now</button>
+          </div>
+
+          <div class="contact-card">
+            <div class="card-icon-wrapper accent">
+              <MapPin :size="28" class="card-icon" />
+            </div>
+            <h3>Visit Us</h3>
+            <p class="card-detail">Kampala, Uganda</p>
+            <p class="card-description">Mon-Fri: 9am - 5pm</p>
+            <button @click="openMap" class="card-action">Get Directions</button>
+          </div>
+
+          <div class="contact-card">
+            <div class="card-icon-wrapper info">
+              <MessageCircle :size="28" class="card-icon" />
+            </div>
+            <h3>Start Chat</h3>
+            <p class="card-detail">Chat with our team</p>
+            <p class="card-description">Available 24/7</p>
+            <button @click="startChat" class="card-action">Open WhatsApp</button>
+          </div>
+        </div>
       </div>
 
       <!-- Social Media Section -->
@@ -180,6 +177,27 @@
         </div>
       </div>
     </div>
+
+    <!-- Phone Number Copy Modal -->
+    <div v-if="showPhoneModal" class="modal-overlay" @click="showPhoneModal = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <Phone :size="48" class="modal-icon phone-icon" />
+          <h3>Call Us</h3>
+        </div>
+        <div class="modal-body">
+          <p class="phone-number">+256 700 123 456</p>
+          <button @click="copyPhoneNumber" class="copy-btn">
+            <Copy :size="18" v-if="!copied" />
+            <CheckCircle2 :size="18" v-else />
+            <span>{{ copied ? 'Copied!' : 'Copy Number' }}</span>
+          </button>
+        </div>
+        <div class="modal-actions">
+          <button @click="showPhoneModal = false" class="btn btn-secondary">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -199,13 +217,16 @@ import {
   Instagram,
   Linkedin,
   ArrowLeft,
-  Home
+  Home,
+  Copy
 } from 'lucide-vue-next'
 
 const router = useRouter()
 
 const loading = ref(false)
 const showSuccess = ref(false)
+const showPhoneModal = ref(false)
+const copied = ref(false)
 
 const contactForm = ref({
   name: '',
@@ -238,12 +259,47 @@ const handleQuickContact = async () => {
   }, 1500)
 }
 
+const openEmail = () => {
+  // Open Gmail compose in new tab
+  window.open('https://mail.google.com/mail/?view=cm&fs=1&to=support@mzeechakula.ug', '_blank')
+}
+
+const handleCall = () => {
+  // Check if on mobile device
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+
+  if (isMobile) {
+    // On mobile, directly open phone dialer
+    window.location.href = 'tel:+256700123456'
+  } else {
+    // On desktop/browser, show modal to copy number
+    showPhoneModal.value = true
+    copied.value = false
+  }
+}
+
+const copyPhoneNumber = async () => {
+  try {
+    await navigator.clipboard.writeText('+256700123456')
+    copied.value = true
+    setTimeout(() => {
+      copied.value = false
+    }, 2000)
+  } catch (err) {
+    console.error('Failed to copy:', err)
+  }
+}
+
 const openMap = () => {
-  window.open('https://maps.google.com/?q=Kampala,Uganda', '_blank')
+  // Open Google Maps with the location
+  window.open('https://www.google.com/maps/search/?api=1&query=Kampala,Uganda', '_blank')
 }
 
 const startChat = () => {
-  alert('Live chat feature will be implemented with backend integration.')
+  // Open WhatsApp chat
+  const phoneNumber = '256700123456' // WhatsApp format without + or spaces
+  const message = 'Hello, I need assistance with Mzee Chakula'
+  window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank')
 }
 
 const goBack = () => {
@@ -361,7 +417,7 @@ const goHome = () => {
 
 .contact-card {
   background: var(--color-white);
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
@@ -369,6 +425,8 @@ const goHome = () => {
   flex-direction: column;
   align-items: center;
   text-align: center;
+  height: 100%;
+  min-height: 220px;
 }
 
 .contact-card:hover {
@@ -377,13 +435,13 @@ const goHome = () => {
 }
 
 .card-icon-wrapper {
-  width: 80px;
-  height: 80px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .card-icon-wrapper.primary {
@@ -419,27 +477,28 @@ const goHome = () => {
 }
 
 .contact-card h3 {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 700;
   color: var(--color-dark);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .card-detail {
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   color: var(--color-gray-700);
   margin-bottom: 0.25rem;
 }
 
 .card-description {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: var(--color-gray-500);
-  margin: 0.5rem 0 1.25rem;
+  margin: 0.5rem 0 1rem;
+  flex: 1;
 }
 
 .card-action {
-  padding: 0.625rem 1.5rem;
+  padding: 0.625rem 1.25rem;
   background: var(--color-primary);
   color: var(--color-white);
   border: none;
@@ -450,6 +509,7 @@ const goHome = () => {
   transition: all 0.3s ease;
   text-decoration: none;
   display: inline-block;
+  margin-top: auto;
 }
 
 .card-action:hover {
@@ -719,33 +779,41 @@ const goHome = () => {
 
   .contact-cards {
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    gap: 0.75rem;
   }
 
   .contact-card {
-    padding: 1.25rem 1rem;
+    padding: 1rem;
+    min-height: 200px;
   }
 
   .card-icon-wrapper {
-    width: 60px;
-    height: 60px;
-    margin-bottom: 1rem;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 0.75rem;
+  }
+
+  .card-icon-wrapper svg {
+    width: 24px;
+    height: 24px;
   }
 
   .contact-card h3 {
-    font-size: 1rem;
+    font-size: 0.9375rem;
+    margin-bottom: 0.375rem;
   }
 
   .card-detail {
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
   }
 
   .card-description {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
+    margin: 0.375rem 0 0.75rem;
   }
 
   .card-action {
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.875rem;
     font-size: 0.75rem;
   }
 
@@ -772,6 +840,140 @@ const goHome = () => {
 
   .banner-btn {
     width: 100%;
+  }
+
+  .modal-content {
+    padding: 1.5rem;
+  }
+
+  .modal-header h3 {
+    font-size: 1.25rem;
+  }
+
+  .phone-number {
+    font-size: 1.25rem;
+  }
+
+  .copy-btn {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9375rem;
+  }
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--color-white);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
+}
+
+.modal-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.modal-icon {
+  margin-bottom: 1rem;
+}
+
+.phone-icon {
+  color: var(--color-secondary-dark);
+}
+
+.modal-header h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-dark);
+  margin: 0;
+}
+
+.modal-body {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.phone-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0 0 1.5rem 0;
+  letter-spacing: 1px;
+}
+
+.copy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  background: var(--color-gray-100);
+  border: 2px solid var(--color-gray-300);
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-dark);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 0 auto;
+}
+
+.copy-btn:hover {
+  background: var(--color-gray-200);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn {
+  flex: 1;
+  padding: 0.875rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.btn-secondary {
+  background: var(--color-gray-200);
+  color: var(--color-gray-700);
+}
+
+.btn-secondary:hover {
+  background: var(--color-gray-300);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>
