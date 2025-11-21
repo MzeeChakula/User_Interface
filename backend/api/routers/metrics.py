@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Response
 from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+from api.models.prediction import ModelInfo
+from api.models.loader import ModelLoader
 import time
 
 router = APIRouter(tags=["Metrics"])

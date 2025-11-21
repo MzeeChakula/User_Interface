@@ -5,10 +5,16 @@ import logging
 from pathlib import Path
 from contextlib import asynccontextmanager
 
-from .models import ModelLoader
+from .models.loader import ModelLoader
 from .routers import predict_router, health_router
 from .routers import predict, health
 from .routers.metrics import router as metrics_router
+from .models import database, user, chat
+
+# Create database tables
+# Order matters for foreign keys: User -> Conversation -> Message
+user.Base.metadata.create_all(bind=database.engine)
+chat.Base.metadata.create_all(bind=database.engine)
 
 # Setup logging
 logging.basicConfig(
@@ -83,10 +89,15 @@ except Exception as e:
     logger.error(f"Failed to initialize models: {e}")
     raise
 
+from .routers.auth import router as auth_router
+from .routers.chat import router as chat_router
+
 # Include routers
 app.include_router(health_router)
 app.include_router(predict_router)
 app.include_router(metrics_router)
+app.include_router(auth_router)
+app.include_router(chat_router)
 
 
 @app.get("/", include_in_schema=False)

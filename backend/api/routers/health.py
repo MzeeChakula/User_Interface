@@ -1,6 +1,8 @@
-from fastapi import APIRouter
+
+from fastapi import APIRouter, HTTPException
 from datetime import datetime
-from ..models import HealthStatus, ModelStatus, EncodingReference
+from api.models.prediction import HealthStatus, ModelStatus, EncodingReference
+from api.models.loader import ModelLoader
 
 router = APIRouter(
     prefix="/health",

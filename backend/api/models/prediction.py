@@ -1,40 +1,6 @@
-from pydantic import BaseModel, Field, field_validator, ConfigDict
 from typing import Optional, Dict, List, Any
-from enum import Enum
-
-
-class Region(str, Enum):
-    """Uganda regions"""
-    CENTRAL = "Central Uganda (Buganda)"
-    WESTERN = "Western Uganda (Ankole, Tooro, Kigezi, Bunyoro)"
-    EASTERN = "Eastern Uganda (Busoga, Bugisu, Teso)"
-    NORTHERN = "Northern Uganda (Acholi, Lango, Karamoja, West Nile)"
-
-
-class Condition(str, Enum):
-    """Health conditions"""
-    HYPERTENSION = "Hypertension"
-    UNDERNUTRITION = "Undernutrition"
-    ANEMIA = "Anemia"
-    FRAILTY = "Frailty"
-    DIGESTIVE = "Digestive issues"
-    ARTHRITIS = "Arthritis"
-    OSTEOPOROSIS = "Osteoporosis"
-    DIABETES = "Diabetes"
-
-
-class AgeGroup(str, Enum):
-    """Age groups"""
-    SIXTY_TO_SEVENTY = "60-70"
-    SEVENTY_TO_EIGHTY = "70-80"
-    EIGHTY_PLUS = "80+"
-
-
-class Season(str, Enum):
-    """Seasons"""
-    DRY = "Dry"
-    WET = "Wet"
-
+from pydantic import BaseModel, Field, ConfigDict
+from .common import Region, Condition, AgeGroup, Season
 
 class NutritionInput(BaseModel):
     """Input data for nutrition prediction"""
@@ -90,14 +56,12 @@ class NutritionInput(BaseModel):
         }
     )
 
-
 class PredictionOutput(BaseModel):
     """Prediction response"""
     caloric_needs: float = Field(..., description="Predicted daily caloric needs in kcal/day")
     unit: str = Field(default="kcal/day", description="Unit of measurement")
     model: str = Field(..., description="Model used for prediction")
     accuracy: str = Field(..., description="Model accuracy metrics")
-
 
 class ModelInfo(BaseModel):
     """Model information"""
@@ -107,7 +71,6 @@ class ModelInfo(BaseModel):
     test_r2: float = Field(..., description="Test R² score")
     test_mae: float = Field(..., description="Test MAE")
 
-
 class PredictionResponse(BaseModel):
     """Complete prediction response"""
     success: bool = Field(..., description="Whether prediction was successful")
@@ -116,14 +79,12 @@ class PredictionResponse(BaseModel):
     status: str = Field(..., description="Status (online/offline)")
     error: Optional[str] = Field(None, description="Error message if failed")
 
-
 class HealthStatus(BaseModel):
     """Health check response"""
     status: str = Field(..., description="API status")
     version: str = Field(..., description="API version")
     models: Dict[str, bool] = Field(..., description="Available models")
     timestamp: str = Field(..., description="Current timestamp")
-
 
 class EncodingReference(BaseModel):
     """Reference for feature encoding"""
@@ -132,19 +93,16 @@ class EncodingReference(BaseModel):
     age_groups: Dict[int, str]
     seasons: Dict[int, str]
 
-
 class ModelStatus(BaseModel):
     """Status of available models"""
     offline_model: Dict[str, Any]
     online_model: Dict[str, Any]
     huggingface_model: Optional[Dict[str, Any]] = None
 
-
 class BatchPredictionInput(BaseModel):
     """Batch prediction input"""
     inputs: List[NutritionInput] = Field(..., description="List of nutrition inputs")
     prefer_online: bool = Field(default=True, description="Prefer online model")
-
 
 class BatchPredictionResponse(BaseModel):
     """Batch prediction response"""
@@ -152,38 +110,4 @@ class BatchPredictionResponse(BaseModel):
     predictions: List[PredictionResponse]
     total: int
     successful: int
-
-class UserBase(BaseModel):
-    """Base user schema"""
-    email: str = Field(..., description="User email")
-    full_name: Optional[str] = Field(None, description="User full name")
-    is_active: bool = Field(default=True, description="Is user active")
-
-
-class UserCreate(UserBase):
-    """User creation schema"""
-    password: str = Field(..., min_length=8, description="User password")
-
-
-class UserLogin(BaseModel):
-    """User login schema"""
-    email: str = Field(..., description="User email")
-    password: str = Field(..., description="User password")
-
-
-class User(UserBase):
-    """User response schema"""
-    id: int = Field(..., description="User ID")
-    
-    model_config = ConfigDict(from_attributes=True)
-
-
-class Token(BaseModel):
-    """JWT token schema"""
-    access_token: str
-    token_type: str
-
-
-class TokenData(BaseModel):
-    """JWT token data schema"""
-    email: Optional[str] = None
+    failed: int

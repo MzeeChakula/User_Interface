@@ -1,13 +1,13 @@
-from fastapi import APIRouter, HTTPException, Query
-from typing import Optional
+from fastapi import APIRouter, HTTPException, BackgroundTasks
+from typing import List, Optional
 import logging
-
-from ..models import (
+from api.models.prediction import (
     NutritionInput,
     PredictionResponse,
     BatchPredictionInput,
     BatchPredictionResponse
 )
+from api.models.loader import ModelLoader
 
 logger = logging.getLogger(__name__)
 
