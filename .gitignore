@@ -31,7 +31,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-context.md 
-context.txt
-backend-modeltesting/
