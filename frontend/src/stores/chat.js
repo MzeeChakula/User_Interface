@@ -1,10 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { chatAPI } from '../api'
+import { useProfileStore } from './profile'
+import { useAppStore } from './app'
 
 export const useChatStore = defineStore('chat', () => {
   const conversations = ref([])
   const currentConversation = ref(null)
   const isLoading = ref(false)
+  const error = ref(null)
 
   const loadConversations = () => {
     const saved = localStorage.getItem('conversations')
@@ -49,6 +53,57 @@ export const useChatStore = defineStore('chat', () => {
     saveConversations()
   }
 
+  const sendMessage = async (messageContent) => {
+    if (!currentConversation.value) {
+      createConversation()
+    }
+
+    // Add user message to conversation
+    const userMessage = {
+      role: 'user',
+      content: messageContent
+    }
+    addMessage(userMessage)
+
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const profileStore = useProfileStore()
+      const appStore = useAppStore()
+
+      // Send message to backend with profile and language context
+      const response = await chatAPI.sendMessage({
+        message: messageContent,
+        language: appStore.language || 'en',
+        profile: profileStore.elderProfile || undefined
+      })
+
+      // Add AI response to conversation
+      const aiMessage = {
+        role: 'assistant',
+        content: response.response || response.message || 'Sorry, I could not process that request.'
+      }
+      addMessage(aiMessage)
+
+      return response
+    } catch (err) {
+      console.error('Chat error:', err)
+      error.value = err.response?.data?.detail || 'Failed to send message'
+
+      // Add error message
+      const errorMessage = {
+        role: 'assistant',
+        content: `Sorry, I encountered an error: ${error.value}. Please try again.`
+      }
+      addMessage(errorMessage)
+
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   const setCurrentConversation = (conversationId) => {
     currentConversation.value = conversations.value.find(c => c.id === conversationId)
   }
@@ -65,9 +120,11 @@ export const useChatStore = defineStore('chat', () => {
     conversations,
     currentConversation,
     isLoading,
+    error,
     loadConversations,
     createConversation,
     addMessage,
+    sendMessage,
     setCurrentConversation,
     deleteConversation
   }
