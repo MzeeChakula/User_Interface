@@ -125,11 +125,45 @@
         </div>
       </div>
     </div>
+
+    <!-- Delete Account Confirmation Modal -->
+    <div v-if="showDeleteModal" class="modal-overlay" @click="showDeleteModal = false">
+      <div class="modal-content delete-modal" @click.stop>
+        <div class="modal-header">
+          <Trash2 :size="48" class="modal-icon delete-icon" />
+          <h3>Delete Account</h3>
+        </div>
+        <div class="modal-body">
+          <p><strong>Warning:</strong> This action cannot be undone!</p>
+          <p>All your data, conversations, and settings will be permanently deleted.</p>
+          <div class="confirmation-input">
+            <label for="deleteConfirm">Type <strong>DELETE</strong> to confirm:</label>
+            <input
+              v-model="deleteConfirmText"
+              type="text"
+              id="deleteConfirm"
+              placeholder="DELETE"
+              class="confirm-input"
+            />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button
+            @click="confirmDeleteAccount"
+            class="btn btn-danger"
+            :disabled="deleteConfirmText !== 'DELETE'"
+          >
+            Delete My Account
+          </button>
+          <button @click="closeDeleteModal" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '../stores/app'
 import { useAuthStore } from '../stores/auth'
@@ -142,6 +176,9 @@ const appStore = useAppStore()
 const authStore = useAuthStore()
 const chatStore = useChatStore()
 const { isOnline } = useOnlineStatus()
+
+const showDeleteModal = ref(false)
+const deleteConfirmText = ref('')
 
 const storageUsed = computed(() => {
   let size = 0
@@ -181,16 +218,19 @@ const logout = () => {
 }
 
 const deleteAccount = () => {
-  const confirmation = prompt(
-    'This action cannot be undone. Type "DELETE" to confirm account deletion:'
-  )
+  showDeleteModal.value = true
+}
 
-  if (confirmation === 'DELETE') {
-    authStore.logout()
-    localStorage.clear()
-    router.push({ name: 'Auth' })
-    alert('Your account has been deleted.')
-  }
+const confirmDeleteAccount = () => {
+  authStore.logout()
+  localStorage.clear()
+  router.push({ name: 'Auth' })
+  alert('Your account has been deleted.')
+}
+
+const closeDeleteModal = () => {
+  showDeleteModal.value = false
+  deleteConfirmText.value = ''
 }
 
 const clearCache = () => {
@@ -456,6 +496,126 @@ input:checked + .toggle-slider:before {
   color: #6c757d;
 }
 
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  margin: 1rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.modal-icon {
+  margin-bottom: 1rem;
+}
+
+.delete-icon {
+  color: #dc3545;
+}
+
+.modal-header h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+.modal-body {
+  margin-bottom: 2rem;
+}
+
+.modal-body p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: var(--color-gray-700);
+}
+
+.confirmation-input {
+  margin-top: 1.5rem;
+}
+
+.confirmation-input label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+.confirm-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--color-gray-300);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.confirm-input:focus {
+  outline: none;
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+}
+
+.btn {
+  padding: 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  font-size: 1rem;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+}
+
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: var(--color-gray-200);
+  color: var(--color-gray-700);
+}
+
+.btn-secondary:hover {
+  background: var(--color-gray-300);
+}
+
 @media (max-width: 1024px) {
   .settings-grid {
     grid-template-columns: 1fr;
@@ -473,6 +633,20 @@ input:checked + .toggle-slider:before {
 
   .settings-grid {
     gap: 1.5rem;
+  }
+
+  .header-title {
+    font-size: 1rem;
+  }
+
+  .setting-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .setting-select {
+    width: 100%;
   }
 }
 </style>

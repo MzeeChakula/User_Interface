@@ -237,6 +237,11 @@ onMounted(() => {
     top: 18%;
     padding: 1.5rem;
   }
+
+  .wave-svg {
+    bottom: 0;
+    height: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -247,6 +252,19 @@ onMounted(() => {
 
   .brand-name {
     margin-bottom: 1rem;
+    font-size: clamp(2.5rem, 8vw, 4rem);
+  }
+
+  .wave-svg {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .wave-svg path {
+    vector-effect: non-scaling-stroke;
   }
 }
 </style>

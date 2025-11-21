@@ -705,12 +705,48 @@ const goHome = () => {
     font-size: 1rem;
   }
 
+  .header-title {
+    font-size: 1rem;
+  }
+
   .contact-content {
     padding: 0 1rem 2rem;
   }
 
-  .contact-cards {
+  .contact-grid {
     grid-template-columns: 1fr;
+  }
+
+  .contact-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .contact-card {
+    padding: 1.25rem 1rem;
+  }
+
+  .card-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 1rem;
+  }
+
+  .contact-card h3 {
+    font-size: 1rem;
+  }
+
+  .card-detail {
+    font-size: 0.875rem;
+  }
+
+  .card-description {
+    font-size: 0.75rem;
+  }
+
+  .card-action {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
   }
 
   .quick-contact-form {

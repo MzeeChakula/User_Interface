@@ -465,10 +465,14 @@ const goHome = () => {
 
 @media (max-width: 768px) {
   .title {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 
   .subtitle {
+    font-size: 0.938rem;
+  }
+
+  .header-title {
     font-size: 1rem;
   }
 

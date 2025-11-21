@@ -700,29 +700,126 @@ const resetForm = () => {
 }
 
 @media (max-width: 768px) {
+  .profile-content {
+    padding: 1rem;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .profile-sidebar {
+    max-width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .avatar-section {
+    padding: 1rem;
+  }
+
+  .avatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  .avatar svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .elder-name {
+    font-size: 0.875rem;
+    margin: 0 0 0.25rem 0;
+  }
+
+  .elder-subtitle {
+    font-size: 0.625rem;
+  }
+
+  .quick-stats {
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .stat-item {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .stat-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .stat-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .stat-label {
+    font-size: 0.625rem;
+  }
+
+  .stat-value {
+    font-size: 1rem;
+  }
+
+  .profile-card {
+    padding: 1rem;
+  }
+
+  .profile-form {
+    gap: 1rem;
+  }
+
   .form-row {
     grid-template-columns: 1fr;
+  }
+
+  .form-section {
+    gap: 0.5rem;
+  }
+
+  .form-label {
+    font-size: 0.875rem;
+  }
+
+  .form-input,
+  .form-select {
+    padding: 0.625rem;
+    font-size: 0.875rem;
   }
 
   .checkbox-group {
     grid-template-columns: 1fr;
   }
 
+  .checkbox-label {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .tags-input {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .tag {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.5rem;
+  }
+
   .form-actions {
     flex-direction: column;
+    gap: 0.5rem;
   }
 
-  .avatar-section {
-    padding: 2rem 1.5rem;
-  }
-
-  .avatar {
-    width: 120px;
-    height: 120px;
-  }
-
-  .elder-name {
-    font-size: 1.5rem;
+  .btn {
+    padding: 0.75rem;
+    font-size: 0.875rem;
   }
 }
 </style>

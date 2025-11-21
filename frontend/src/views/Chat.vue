@@ -196,6 +196,23 @@
       accept=".pdf,.doc,.docx,.txt"
       style="display: none"
     />
+
+    <!-- Logout Confirmation Modal -->
+    <div v-if="showLogoutModal" class="modal-overlay" @click="showLogoutModal = false">
+      <div class="modal-content logout-modal" @click.stop>
+        <div class="modal-header">
+          <LogOut :size="48" class="modal-icon logout-icon" />
+          <h3>Confirm Logout</h3>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to log out of your account?</p>
+        </div>
+        <div class="modal-actions">
+          <button @click="confirmLogout" class="btn btn-danger">Yes, Logout</button>
+          <button @click="showLogoutModal = false" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -226,6 +243,7 @@ const isRecording = ref(false)
 const showUploadWarning = ref(false)
 const fileInput = ref(null)
 const helpDropdownOpen = ref(false)
+const showLogoutModal = ref(false)
 
 const examplePrompts = [
   'Create a weekly plan for diabetes',
@@ -323,10 +341,12 @@ const changeLanguage = () => {
 }
 
 const handleLogout = () => {
-  if (confirm('Are you sure you want to logout?')) {
-    authStore.logout()
-    router.push({ name: 'Auth' })
-  }
+  showLogoutModal.value = true
+}
+
+const confirmLogout = () => {
+  authStore.logout()
+  router.push({ name: 'Auth' })
 }
 
 const toggleVoiceInput = () => {
@@ -931,6 +951,14 @@ const handleFileUpload = (event) => {
   color: var(--color-dark);
 }
 
+.modal-icon {
+  margin-bottom: 1rem;
+}
+
+.logout-icon {
+  color: var(--color-primary);
+}
+
 .modal-body {
   margin-bottom: 2rem;
 }
@@ -975,6 +1003,17 @@ const handleFileUpload = (event) => {
   transform: translateY(-2px);
 }
 
+.btn-danger {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-danger:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(217, 0, 0, 0.3);
+}
+
 .btn-secondary {
   background: var(--color-gray-200);
   color: var(--color-gray-700);
@@ -990,6 +1029,7 @@ const handleFileUpload = (event) => {
     position: fixed;
     left: 0;
     top: 0;
+    width: 100vw;
     height: 100vh;
     z-index: 1000;
     transform: translateX(-100%);
@@ -999,33 +1039,118 @@ const handleFileUpload = (event) => {
     transform: translateX(0);
   }
 
+  .chat-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .header-title {
+    font-size: 0.75rem;
+    line-height: 1.2;
+  }
+
   .mobile-only {
     display: block !important;
   }
 
   .menu-btn {
     display: block !important;
+    margin-right: 0.5rem;
+  }
+
+  .header-actions {
+    gap: 0.5rem;
+  }
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .icon-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .messages-container {
+    padding: 1rem;
   }
 
   .message {
     max-width: 90%;
   }
 
+  .message-content {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+
   .welcome-section {
     margin: 2rem auto;
+  }
+
+  .welcome-title {
+    font-size: 1.5rem;
+  }
+
+  .welcome-text {
+    font-size: 1rem;
   }
 
   .prompt-suggestions {
     grid-template-columns: 1fr;
   }
 
+  .prompt-btn {
+    padding: 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .input-area {
+    padding: 1rem;
+  }
+
   .input-form {
     gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .message-input {
+    order: 1;
+    flex-basis: 100%;
+    padding: 0.875rem 1rem;
+    font-size: 0.9375rem;
   }
 
   .input-action-btn {
-    width: 40px;
-    height: 40px;
+    order: 2;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+
+  .send-btn {
+    order: 2;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+
+  .modal-content {
+    margin: 0.5rem;
+    padding: 1.5rem;
+  }
+
+  .modal-header h3 {
+    font-size: 1.25rem;
+  }
+
+  .modal-body {
+    font-size: 0.875rem;
+  }
+
+  .btn {
+    padding: 0.875rem;
+    font-size: 0.9375rem;
   }
 }
 

@@ -376,10 +376,31 @@ const getStarted = () => {
 
   .tutorial-column {
     padding: 2rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tutorial-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tutorial-header {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
   .tutorial-cards {
-    height: 400px;
+    height: 350px;
+    width: 100%;
+  }
+
+  .card-icon svg {
+    width: 64px;
+    height: 64px;
   }
 }
 
@@ -394,6 +415,15 @@ const getStarted = () => {
 
   .card-description {
     font-size: 0.875rem;
+  }
+
+  .card-icon svg {
+    width: 56px;
+    height: 56px;
+  }
+
+  .tutorial-cards {
+    height: 320px;
   }
 }
 </style>
