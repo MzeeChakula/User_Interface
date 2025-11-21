@@ -1,0 +1,59 @@
+# Graph-Enhanced LLMs for Locally Sourced Elderly Nutrition Planning in Uganda
+
+## Project Overview
+This project aims to develop an AI-powered nutrition planning system specifically designed for elderly care in Uganda, combining Large Language Models (LLMs) with graph-based reasoning to provide culturally relevant and locally sourced meal recommendations.
+
+## Abstract
+
+The methodology begins with the creation and curation of a specialized dataset, integrating:
+
+### Data Sources:
+- **Published literature on geriatric nutrition** covering macro- and micronutrient needs for aging populations:
+  - Protein for muscle preservation
+  - Calcium and vitamin D for bone health
+  - Iron and folate for anemia prevention
+  - Omega-3 fatty acids for cardiovascular function
+
+- **Regional food composition tables and agricultural surveys** documenting nutritional profiles of locally available foods:
+  - Beans, groundnuts, millet
+  - Matooke, sweet potatoes
+  - Leafy greens, small fish
+  - Local fruits
+
+### Knowledge Graph Structure:
+The system creates structured connections linking:
+**Nutrients ↔ Health Benefits ↔ Elderly Conditions ↔ Local Food Items**
+
+This enables structured reasoning over food–nutrient–condition pathways for conditions such as:
+- Diabetes
+- Hypertension  
+- Frailty
+
+### LLM Integration:
+The LLM will be fine-tuned on this corpus and augmented with the knowledge graph to:
+- Generate personalized meal plans based on individual's age, dietary restrictions, and health conditions
+- Recommend culturally relevant, balanced, and affordable meals
+- Incorporate graph constraints to avoid harmful food–condition interactions
+- Provide weekly meal schedules, portion guidelines, and substitution options
+- Include explanatory notes for caregivers
+
+### Technical Requirements:
+- **Mobile and offline-first deployment** for resource-constrained environments
+- **Privacy-preserving design**
+- **Caregiver-friendly interfaces** in local languages
+- **Seasonality and local availability** considerations
+
+### Evaluation Metrics:
+1. **Accuracy** of nutrient-to-food mappings against dietician-verified gold standards
+2. **Relevance and affordability** of generated plans for Ugandan households
+3. **Acceptability and usability** among elderly caregivers
+4. **Health outcome proxies** such as improved dietary diversity scores
+
+## Project Goals:
+By combining LLM-based generation, graph reasoning, and local food knowledge, this project delivers an inclusive and sustainable solution to enhance elderly nutritional health and home-based care in African contexts.
+
+## Keywords:
+Elderly Nutrition, Large Language Models (LLMs), Graph-Based Reasoning, Locally Available Foods, Home-Based Elderly Care, African Context Nutrition
+
+---
+*This file serves as the project reference context and should be updated as the project evolves.*
