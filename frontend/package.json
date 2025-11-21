@@ -11,8 +11,13 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
+    "axios": "^1.13.2",
+    "pinia": "^3.0.4",
     "tailwindcss": "^4.1.17",
-    "vue": "^3.5.22"
+    "vite-plugin-pwa": "^1.1.0",
+    "vue": "^3.5.22",
+    "vue-router": "^4.6.3",
+    "workbox-window": "^7.4.0"
   },
   "devDependencies": {
     "@vite-pwa/assets-generator": "^1.0.2",
