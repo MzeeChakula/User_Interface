@@ -1,0 +1,81 @@
+{
+  "model_type": "XGBoost Regressor",
+  "model_version": "v1.0_optimized",
+  "training_date": "2025-11-20 17:01:53",
+  "dataset_size": 500500,
+  "train_size": 350350,
+  "test_size": 150150,
+  "n_features": 15,
+  "feature_names": [
+    "energy_kcal_per_serving",
+    "protein_g_per_serving",
+    "fat_g_per_serving",
+    "carbohydrate_g_per_serving",
+    "fiber_g_per_serving",
+    "calcium_mg_per_serving",
+    "iron_mg_per_serving",
+    "zinc_mg_per_serving",
+    "vitamin_a_mcg_per_serving",
+    "vitamin_c_mg_per_serving",
+    "potassium_mg_per_serving",
+    "region_encoded",
+    "condition_encoded",
+    "age_group_encoded",
+    "season_encoded"
+  ],
+  "best_parameters": {
+    "subsample": 0.8,
+    "reg_lambda": 1,
+    "reg_alpha": 0,
+    "n_estimators": 200,
+    "min_child_weight": 3,
+    "max_depth": 6,
+    "learning_rate": 0.05,
+    "gamma": 0,
+    "colsample_bytree": 0.8
+  },
+  "performance": {
+    "train_r2": 0.9546547001501923,
+    "test_r2": 0.9531505645615065,
+    "train_rmse": 3.32993441226066,
+    "test_rmse": 3.3865405056128295,
+    "train_mae": 2.5547263861638947,
+    "test_mae": 2.5932409974278,
+    "training_time_seconds": 35.81219220161438
+  },
+  "baseline_comparison": {
+    "baseline_test_r2": 0.9523913643765665,
+    "baseline_test_mae": 2.614625244209965,
+    "improvement_r2": 0.0007592001849400232,
+    "improvement_mae": 0.021384246782164773
+  },
+  "regions": [
+    "Eastern",
+    "Northern",
+    "Central",
+    "Western"
+  ],
+  "conditions": [
+    "COPD",
+    "GERD",
+    "Protein-energy malnutrition",
+    "Pressure ulcers",
+    "Anemia (Iron deficiency)",
+    "Hyperlipidemia",
+    "Sarcopenia",
+    "Constipation",
+    "Dementia",
+    "Ischemic Heart Disease",
+    "Osteoporosis",
+    "Depression",
+    "Stroke (post-stroke care)",
+    "Chronic Kidney Disease",
+    "Hypertension",
+    "Type 2 Diabetes"
+  ],
+  "age_groups": [
+    "very_elderly",
+    "middle_aged",
+    "elderly"
+  ]
+}

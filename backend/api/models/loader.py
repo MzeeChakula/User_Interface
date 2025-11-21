@@ -25,10 +25,11 @@ class ModelLoader:
     """
     
     def __init__(self, local_model_dir: Optional[str] = None):
-        # Use absolute path from project root
+        # Use absolute path - models are in backend/models/
         if local_model_dir is None:
-            project_root = Path(__file__).parent.parent.parent.parent
-            local_model_dir = project_root / "src" / "results" / "models"
+            # From api/models/loader.py -> go up to backend/ then into models/
+            backend_root = Path(__file__).parent.parent.parent
+            local_model_dir = backend_root / "models"
         self.local_model_dir = Path(local_model_dir)
         self.models = {}
         self.feature_names = None
@@ -47,8 +48,10 @@ class ModelLoader:
     def _load_feature_names(self):
         """Load feature names"""
         try:
-            # Try v2 first
-            feature_path = self.local_model_dir / 'feature_names_v2_20251103.pkl'
+            # Try newest date first (20251120), then older versions
+            feature_path = self.local_model_dir / 'xgboost_feature_names_20251120.pkl'
+            if not feature_path.exists():
+                feature_path = self.local_model_dir / 'feature_names_v2_20251103.pkl'
             if not feature_path.exists():
                 feature_path = self.local_model_dir / 'xgboost_feature_names_20251103.pkl'
 
@@ -99,7 +102,10 @@ class ModelLoader:
     def _load_local_xgboost(self):
         """Load local XGBoost model"""
         try:
-            model_path = self.local_model_dir / 'xgboost_nutrition_model_20251103.pkl'
+            # Try newest date first
+            model_path = self.local_model_dir / 'xgboost_nutrition_model_20251120.pkl'
+            if not model_path.exists():
+                model_path = self.local_model_dir / 'xgboost_nutrition_model_20251103.pkl'
             if not model_path.exists():
                 logger.warning("Local XGBoost model not found")
                 return
