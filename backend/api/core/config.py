@@ -56,7 +56,7 @@ class Settings(BaseSettings):
     
     # Model
     MODEL_DIR: str = "/app/models"
-    HUGGINGFACE_REPO: str = "Shakiran/MzeeChakula_Model"
+    HUGGINGFACE_REPO: str = "Shakiran/MzeeChakulaNutritionEnsembleModel"
     
     class Config:
         env_file = ".env"

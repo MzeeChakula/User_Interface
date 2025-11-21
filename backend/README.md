@@ -53,12 +53,3 @@ uvicorn api.main:app --reload
 - Swagger UI: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
 
-## Status
-
-- ✓ Base structure migrated from model testing
-- ✓ Docker configuration ready
-- ⚙️ Authentication system (in progress)
-- ⚙️ Chat system (in progress)
-- ⚙️ AI orchestration (in progress)
-
-See `progress.txt` in project root for detailed status.
