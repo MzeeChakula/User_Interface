@@ -7,7 +7,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Use SQLite for local development, can be swapped for PostgreSQL
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./mzeechakula.db")
+# Use /app/data for Render (writable), fallback to current dir for local dev
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:////app/data/mzeechakula.db" if os.path.exists("/app/data") else "sqlite:///./mzeechakula.db")
 
 # Handle Supabase/Postgres connection string (SQLAlchemy requires postgresql:// not postgres://)
 if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
