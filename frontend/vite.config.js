@@ -70,4 +70,40 @@ export default defineConfig({
       }
     })
   ],
+  server: {
+    proxy: {
+      '/auth': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/predict': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/health': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/chat': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/ai': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/docs': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/redoc': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '/openapi.json': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      }
+    }
+  }
 })

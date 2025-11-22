@@ -8,7 +8,7 @@
           <h1 class="brand-title">Mzee Chakula</h1>
           <p class="brand-subtitle">Nourishing our Elders, Together</p>
           <p class="brand-description">
-            AI-powered nutritional assistant designed for elderly care in Uganda.
+            AI-powered nutritional a/ssistant designed for elderly care in Uganda.
             Get personalized meal plans based on health conditions and locally available foods.
           </p>
         </div>
@@ -166,19 +166,32 @@ const toggleMode = () => {
 }
 
 const handleEmailAuth = async () => {
+  console.log('handleEmailAuth called', { isSignUp: isSignUp.value, formData: formData.value })
   loading.value = true
 
   let result
   if (isSignUp.value) {
+    console.log('Calling authStore.register')
     result = await authStore.register(formData.value)
   } else {
+    console.log('Calling authStore.login')
     result = await authStore.login(formData.value)
   }
+  console.log('Auth result:', result)
 
   loading.value = false
 
   if (result.success) {
-    router.push({ name: 'Chat' })
+    if (isSignUp.value) {
+      // Registration successful
+      alert('Account created successfully! Please sign in.')
+      isSignUp.value = false
+      // Keep email filled, clear password
+      formData.value.password = ''
+    } else {
+      // Login successful
+      router.push({ name: 'Chat' })
+    }
   } else {
     alert(result.error || 'Authentication failed. Please try again.')
   }

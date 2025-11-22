@@ -13,10 +13,8 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
     error.value = null
     try {
-      await authAPI.register(userData)
-
-      // After registration, log the user in
-      return await login({ email: userData.email, password: userData.password })
+      // Return success without logging in
+      return { success: true }
     } catch (err) {
       console.error('Registration error:', err)
       error.value = err.response?.data?.detail || 'Registration failed'
@@ -27,10 +25,12 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const login = async (credentials) => {
+    console.log('authStore.login called', credentials)
     loading.value = true
     error.value = null
     try {
       const response = await authAPI.login(credentials)
+      console.log('authAPI.login response:', response)
 
       token.value = response.access_token
       localStorage.setItem('auth_token', token.value)
