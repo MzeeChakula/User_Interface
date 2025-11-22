@@ -33,3 +33,18 @@ class RAGResponse(BaseModel):
     answer: str
     sources: List[Dict]
 
+class VoiceTranscriptionResponse(BaseModel):
+    text: str
+    language: Optional[str] = None
+    duration: Optional[float] = None
+
+class VoiceQueryRequest(BaseModel):
+    translate_to: Optional[str] = None  # Optional: translate transcribed text
+    detect_language: bool = False  # Optional: detect language of transcribed text
+
+class VoiceQueryResponse(BaseModel):
+    transcribed_text: str
+    detected_language: Optional[str] = None
+    detected_language_name: Optional[str] = None
+    translated_text: Optional[str] = None
+    translation_target: Optional[str] = None

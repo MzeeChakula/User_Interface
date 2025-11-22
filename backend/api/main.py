@@ -106,6 +106,7 @@ from .routers.chat import router as chat_router
 from .routers.ai import router as ai_router
 from .routers.meal_plan import router as meal_plan_router
 from .routers.food import router as food_router
+from .routers.voice import router as voice_router
 
 # Include routers
 app.include_router(health_router)
@@ -116,6 +117,7 @@ app.include_router(chat_router)
 app.include_router(ai_router)
 app.include_router(meal_plan_router)
 app.include_router(food_router)
+app.include_router(voice_router)
 
 
 @app.get("/", include_in_schema=False)

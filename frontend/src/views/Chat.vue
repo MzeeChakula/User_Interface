@@ -126,10 +126,34 @@
           v-for="message in chatStore.currentConversation?.messages"
           :key="message.id"
           class="message"
-          :class="message.role"
+          :class="[message.role, { 'system-message': message.type === 'document' || message.type === 'error' }]"
         >
-          <div class="message-content" v-html="formatMarkdown(message.content)"></div>
+          <div v-if="message.type === 'document'" class="message-content document-upload">
+            <div class="document-icon">
+              <Upload :size="24" />
+            </div>
+            <div class="document-info">
+              <div class="document-name">{{ message.fileName }}</div>
+              <div class="document-size">{{ message.fileSize }}</div>
+              <div class="document-status">✓ Ready for questions</div>
+            </div>
+          </div>
+          <div v-else class="message-content" v-html="formatMarkdown(message.content)"></div>
           <div class="message-time">{{ formatTime(message.timestamp) }}</div>
+        </div>
+
+        <!-- Upload Progress Indicator -->
+        <div v-if="isUploading" class="message system-message">
+          <div class="message-content upload-progress">
+            <div class="upload-header">
+              <Upload :size="20" class="upload-icon" />
+              <span class="upload-text">Uploading {{ uploadedFileName }}...</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar" :style="{ width: uploadProgress + '%' }"></div>
+            </div>
+            <div class="progress-text">{{ uploadProgress }}%</div>
+          </div>
         </div>
 
         <div v-if="chatStore.isLoading" class="message assistant">
@@ -236,6 +260,7 @@ import { useAuthStore } from '../stores/auth'
 import { useAppStore } from '../stores/app'
 import { useProfileStore } from '../stores/profile'
 import { useOnlineStatus } from '../composables/useOnlineStatus'
+import { useModals } from '../composables/useModals'
 import { mealPlanAPI, aiAPI } from '../api'
 import {
   X, Plus, Menu, User, Settings, WifiOff, Hand, Send,
@@ -250,6 +275,7 @@ const authStore = useAuthStore()
 const appStore = useAppStore()
 const profileStore = useProfileStore()
 const { isOnline } = useOnlineStatus()
+const { showAlert, showConfirm, showSuccess, showError, showInfo } = useModals()
 
 const sidebarOpen = ref(false)
 const messageInput = ref('')
@@ -261,6 +287,9 @@ const fileInput = ref(null)
 const helpDropdownOpen = ref(false)
 const showLogoutModal = ref(false)
 const isDownloading = ref(false)
+const uploadProgress = ref(0)
+const isUploading = ref(false)
+const uploadedFileName = ref('')
 
 const examplePrompts = [
   'Create a weekly plan for diabetes',
@@ -352,12 +381,21 @@ const formatMarkdown = (content) => {
   return marked.parse(content)
 }
 
-const deleteConversation = (conversationId) => {
-  if (confirm('Are you sure you want to delete this conversation?')) {
+const deleteConversation = async (conversationId) => {
+  const confirmed = await showConfirm({
+    title: 'Delete Conversation',
+    message: 'Are you sure you want to delete this conversation? This action cannot be undone.',
+    type: 'danger',
+    confirmText: 'Delete',
+    cancelText: 'Cancel'
+  })
+
+  if (confirmed) {
     chatStore.deleteConversation(conversationId)
     if (chatStore.conversations.length > 0 && !chatStore.currentConversation) {
       chatStore.setCurrentConversation(chatStore.conversations[0].id)
     }
+    showSuccess('Conversation deleted')
   }
 }
 
@@ -372,7 +410,10 @@ const changeLanguage = async () => {
 
   // Show confirmation
   const languageName = langMap[selectedLanguage.value] || selectedLanguage.value
-  alert(`Language changed to ${languageName}. Your future messages will be processed in ${languageName}.`)
+  await showSuccess(
+    'Language Updated',
+    `Your messages will now be processed in ${languageName}`
+  )
 }
 
 const handleLogout = () => {
@@ -384,12 +425,15 @@ const confirmLogout = () => {
   router.push({ name: 'Auth' })
 }
 
-const toggleVoiceInput = () => {
+const toggleVoiceInput = async () => {
   if (!isRecording.value) {
     // Start recording
     isRecording.value = true
     // TODO: Implement actual voice recording
-    alert('Voice input will be implemented with speech recognition API')
+    await showInfo(
+      'Voice Input Coming Soon',
+      'Voice input feature will be available soon with speech recognition.'
+    )
     setTimeout(() => {
       isRecording.value = false
     }, 3000)
@@ -408,13 +452,49 @@ const proceedWithUpload = () => {
   fileInput.value?.click()
 }
 
-const handleFileUpload = (event) => {
+const handleFileUpload = async (event) => {
   const file = event.target.files[0]
   if (file) {
-    // TODO: Implement actual file upload and RAG processing
-    alert(`File "${file.name}" will be processed with RAG for better recommendations.`)
-    // Reset file input
-    event.target.value = ''
+    isUploading.value = true
+    uploadProgress.value = 0
+    uploadedFileName.value = file.name
+
+    try {
+      // Upload the document with progress tracking
+      await aiAPI.uploadDocument(file, (progress) => {
+        uploadProgress.value = progress
+      })
+
+      // Add upload success message to chat
+      const uploadMessage = {
+        role: 'system',
+        content: `Document "${file.name}" uploaded successfully and is being processed for RAG.`,
+        type: 'document',
+        fileName: file.name,
+        fileSize: (file.size / 1024).toFixed(2) + ' KB'
+      }
+      chatStore.addMessage(uploadMessage)
+
+      // Scroll to bottom to show the upload message
+      await nextTick()
+      scrollToBottom()
+    } catch (error) {
+      console.error('Upload failed:', error)
+
+      // Add error message to chat
+      const errorMessage = {
+        role: 'system',
+        content: `Failed to upload "${file.name}". Please try again.`,
+        type: 'error'
+      }
+      chatStore.addMessage(errorMessage)
+    } finally {
+      isUploading.value = false
+      uploadProgress.value = 0
+      uploadedFileName.value = ''
+      // Reset file input
+      event.target.value = ''
+    }
   }
 }
 
@@ -422,7 +502,12 @@ const downloadMealPlan = async () => {
   const profile = profileStore.elderProfile
 
   if (!profile.name || !profile.ageRange) {
-    alert('Please complete your profile first to generate a meal plan PDF.')
+    await showAlert({
+      title: 'Profile Incomplete',
+      message: 'Please complete your profile first to generate a personalized meal plan PDF.',
+      type: 'warning',
+      buttonText: 'Go to Profile'
+    })
     router.push({ name: 'Profile' })
     return
   }
@@ -442,9 +527,13 @@ const downloadMealPlan = async () => {
     }
 
     await mealPlanAPI.downloadPDF(planData)
+    showSuccess('Meal Plan Downloaded', 'Your meal plan PDF has been saved successfully')
   } catch (error) {
     console.error('Failed to download meal plan:', error)
-    alert('Failed to download meal plan. Please try again.')
+    showError(
+      'Download Failed',
+      'Failed to download meal plan. Please try again.'
+    )
   } finally {
     isDownloading.value = false
   }
@@ -936,6 +1025,119 @@ const downloadMealPlan = async () => {
   background: white;
   color: #212529;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.message.system-message {
+  align-self: center;
+  max-width: 90%;
+}
+
+.message.system-message .message-content {
+  background: var(--color-gray-50);
+  color: var(--color-gray-700);
+  border: 1px solid var(--color-gray-200);
+}
+
+/* Document Upload Styles */
+.document-upload {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem !important;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+  border: 2px solid #0ea5e9 !important;
+}
+
+.document-icon {
+  width: 48px;
+  height: 48px;
+  background: #0ea5e9;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.document-info {
+  flex: 1;
+}
+
+.document-name {
+  font-weight: 700;
+  color: var(--color-dark);
+  margin-bottom: 0.25rem;
+}
+
+.document-size {
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+  margin-bottom: 0.25rem;
+}
+
+.document-status {
+  font-size: 0.875rem;
+  color: #10b981;
+  font-weight: 600;
+}
+
+/* Upload Progress Styles */
+.upload-progress {
+  padding: 1.25rem !important;
+  background: white !important;
+  border: 2px solid var(--color-primary) !important;
+}
+
+.upload-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.upload-icon {
+  color: var(--color-primary);
+  animation: uploadPulse 1.5s infinite;
+}
+
+@keyframes uploadPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+.upload-text {
+  font-weight: 600;
+  color: var(--color-dark);
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: var(--color-gray-200);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.progress-text {
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+  font-weight: 600;
+  text-align: center;
 }
 
 /* Markdown styling */

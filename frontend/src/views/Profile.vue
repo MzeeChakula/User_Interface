@@ -216,10 +216,12 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProfileStore } from '../stores/profile'
+import { useModals } from '../composables/useModals'
 import { User, UserCheck, Heart, Pill, AlertCircle } from 'lucide-vue-next'
 
 const router = useRouter()
 const profileStore = useProfileStore()
+const { showConfirm, showSuccess } = useModals()
 
 const formData = ref({
   name: '',
@@ -295,14 +297,23 @@ const removeTag = (field, index) => {
 const saveProfile = () => {
   profileStore.saveProfile(formData.value)
   saved.value = true
+  showSuccess('Profile Saved', 'Elder profile has been updated successfully')
 
   setTimeout(() => {
     saved.value = false
   }, 3000)
 }
 
-const resetForm = () => {
-  if (confirm('Are you sure you want to reset the profile?')) {
+const resetForm = async () => {
+  const confirmed = await showConfirm({
+    title: 'Reset Profile',
+    message: 'Are you sure you want to reset the profile? All information will be cleared and this action cannot be undone.',
+    type: 'warning',
+    confirmText: 'Reset',
+    cancelText: 'Cancel'
+  })
+
+  if (confirmed) {
     profileStore.resetProfile()
     formData.value = {
       name: '',

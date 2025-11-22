@@ -52,6 +52,7 @@ langchain
 langchain-community
 langchain-groq
 langchain-chroma
+langchain-huggingface
 chromadb
 tavily-python
 # OR Pinecone (uncomment if using)
@@ -59,6 +60,10 @@ tavily-python
 
 # OpenAI-compatible (for Groq)
 openai
+
+# Document Processing
+PyPDF2
+python-docx
 
 # ================================
 # HTTP Client & Utilities

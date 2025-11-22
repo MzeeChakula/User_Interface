@@ -190,12 +190,6 @@ backend/
 └── README.md               # This file
 ```
 
-## Documentation
-
-- [Database Setup](docs/DATABASE_SETUP.md)
-- [HuggingFace Model](docs/HUGGINGFACE_MODEL.md)
-- [Embeddings Implementation](docs/EMBEDDINGS_IMPLEMENTATION.md)
-
 ## Support
 
 - **Issues**: GitHub Issues

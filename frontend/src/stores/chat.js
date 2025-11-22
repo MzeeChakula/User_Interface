@@ -131,6 +131,7 @@ export const useChatStore = defineStore('chat', () => {
     isLoading,
     error,
     loadConversations,
+    saveConversations,
     createConversation,
     addMessage,
     sendMessage,
