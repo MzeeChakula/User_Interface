@@ -72,23 +72,31 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/auth': {
+      '^/auth/.*': {
         target: 'http://localhost:8000',
         changeOrigin: true
       },
-      '/predict': {
+      '^/predict/.*': {
         target: 'http://localhost:8000',
         changeOrigin: true
       },
-      '/health': {
+      '^/health/.*': {
         target: 'http://localhost:8000',
         changeOrigin: true
       },
-      '/chat': {
+      '^/chat/message': {
         target: 'http://localhost:8000',
         changeOrigin: true
       },
-      '/ai': {
+      '^/ai/.*': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '^/meal-plan/.*': {
+        target: 'http://localhost:8000',
+        changeOrigin: true
+      },
+      '^/foods/.*': {
         target: 'http://localhost:8000',
         changeOrigin: true
       },

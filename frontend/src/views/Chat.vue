@@ -30,10 +30,18 @@
           :key="conv.id"
           class="conversation-item"
           :class="{ active: chatStore.currentConversation?.id === conv.id }"
-          @click="selectConversation(conv.id)"
         >
-          <div class="conv-title">{{ conv.title }}</div>
-          <div class="conv-date">{{ formatDate(conv.createdAt) }}</div>
+          <div class="conv-main" @click="selectConversation(conv.id)">
+            <div class="conv-title">{{ conv.title }}</div>
+            <div class="conv-date">{{ formatDate(conv.createdAt) }}</div>
+          </div>
+          <button
+            @click.stop="deleteConversation(conv.id)"
+            class="delete-conv-btn"
+            title="Delete conversation"
+          >
+            <Trash2 :size="16" />
+          </button>
         </div>
 
         <div v-if="chatStore.conversations.length === 0" class="empty-state">
@@ -81,6 +89,10 @@
         <button @click="toggleSidebar" class="menu-btn mobile-only"><Menu :size="24" /></button>
         <h1 class="header-title">Graph-Enhanced LLMs for Locally Sourced Elderly Nutrition Planning in Uganda</h1>
         <div class="header-actions">
+          <button @click="downloadMealPlan" class="download-pdf-btn" :disabled="isDownloading" :class="{ downloading: isDownloading }">
+            <Download :size="20" />
+            <span class="btn-text">Download Meal Plan</span>
+          </button>
           <router-link to="/profile" class="icon-btn" title="Profile"><User :size="20" /></router-link>
           <router-link to="/settings" class="icon-btn" title="Settings"><Settings :size="20" /></router-link>
         </div>
@@ -116,7 +128,7 @@
           class="message"
           :class="message.role"
         >
-          <div class="message-content">{{ message.content }}</div>
+          <div class="message-content" v-html="formatMarkdown(message.content)"></div>
           <div class="message-time">{{ formatTime(message.timestamp) }}</div>
         </div>
 
@@ -222,17 +234,21 @@ import { useRouter } from 'vue-router'
 import { useChatStore } from '../stores/chat'
 import { useAuthStore } from '../stores/auth'
 import { useAppStore } from '../stores/app'
+import { useProfileStore } from '../stores/profile'
 import { useOnlineStatus } from '../composables/useOnlineStatus'
+import { mealPlanAPI, aiAPI } from '../api'
 import {
   X, Plus, Menu, User, Settings, WifiOff, Hand, Send,
   LogOut, Globe, Upload, Mic, MicOff, AlertTriangle,
-  HelpCircle, MessageSquare, Phone, ChevronDown
+  HelpCircle, MessageSquare, Phone, ChevronDown, Download, Trash2
 } from 'lucide-vue-next'
+import { marked } from 'marked'
 
 const router = useRouter()
 const chatStore = useChatStore()
 const authStore = useAuthStore()
 const appStore = useAppStore()
+const profileStore = useProfileStore()
 const { isOnline } = useOnlineStatus()
 
 const sidebarOpen = ref(false)
@@ -244,6 +260,7 @@ const showUploadWarning = ref(false)
 const fileInput = ref(null)
 const helpDropdownOpen = ref(false)
 const showLogoutModal = ref(false)
+const isDownloading = ref(false)
 
 const examplePrompts = [
   'Create a weekly plan for diabetes',
@@ -254,6 +271,7 @@ const examplePrompts = [
 
 onMounted(() => {
   chatStore.loadConversations()
+  profileStore.loadProfile()
 })
 
 const toggleSidebar = () => {
@@ -323,10 +341,38 @@ const formatTime = (dateString) => {
   return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
-const changeLanguage = () => {
+const formatMarkdown = (content) => {
+  // Configure marked for safe rendering
+  marked.setOptions({
+    breaks: true,
+    gfm: true,
+    headerIds: false,
+    mangle: false
+  })
+  return marked.parse(content)
+}
+
+const deleteConversation = (conversationId) => {
+  if (confirm('Are you sure you want to delete this conversation?')) {
+    chatStore.deleteConversation(conversationId)
+    if (chatStore.conversations.length > 0 && !chatStore.currentConversation) {
+      chatStore.setCurrentConversation(chatStore.conversations[0].id)
+    }
+  }
+}
+
+const changeLanguage = async () => {
+  const langMap = {
+    'en': 'English',
+    'lg': 'Luganda',
+    'sw': 'Swahili'
+  }
+
   appStore.setLanguage(selectedLanguage.value)
-  // TODO: Implement actual language change with i18n
-  alert(`Language changed to: ${selectedLanguage.value}. Full translation coming soon!`)
+
+  // Show confirmation
+  const languageName = langMap[selectedLanguage.value] || selectedLanguage.value
+  alert(`Language changed to ${languageName}. Your future messages will be processed in ${languageName}.`)
 }
 
 const handleLogout = () => {
@@ -369,6 +415,38 @@ const handleFileUpload = (event) => {
     alert(`File "${file.name}" will be processed with RAG for better recommendations.`)
     // Reset file input
     event.target.value = ''
+  }
+}
+
+const downloadMealPlan = async () => {
+  const profile = profileStore.elderProfile
+
+  if (!profile.name || !profile.ageRange) {
+    alert('Please complete your profile first to generate a meal plan PDF.')
+    router.push({ name: 'Profile' })
+    return
+  }
+
+  isDownloading.value = true
+
+  try {
+    // Parse age from ageRange (e.g., "60-70" -> 65)
+    const ageMatch = profile.ageRange.match(/(\d+)-(\d+)/)
+    const age = ageMatch ? Math.floor((parseInt(ageMatch[1]) + parseInt(ageMatch[2])) / 2) : 70
+
+    const planData = {
+      name: profile.name,
+      age: age,
+      health_conditions: profile.healthConditions || [],
+      preferred_foods: profile.dietaryPreferences || []
+    }
+
+    await mealPlanAPI.downloadPDF(planData)
+  } catch (error) {
+    console.error('Failed to download meal plan:', error)
+    alert('Failed to download meal plan. Please try again.')
+  } finally {
+    isDownloading.value = false
   }
 }
 </script>
@@ -481,11 +559,15 @@ const handleFileUpload = (event) => {
 }
 
 .conversation-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 1rem;
   margin-bottom: 0.5rem;
   border-radius: 10px;
-  cursor: pointer;
   transition: all 0.2s ease;
+  position: relative;
+  gap: 0.5rem;
 }
 
 .conversation-item:hover {
@@ -495,6 +577,12 @@ const handleFileUpload = (event) => {
 .conversation-item.active {
   background: var(--color-gray-100);
   border-left: 3px solid var(--color-primary);
+}
+
+.conv-main {
+  flex: 1;
+  cursor: pointer;
+  min-width: 0;
 }
 
 .conv-title {
@@ -509,6 +597,27 @@ const handleFileUpload = (event) => {
 .conv-date {
   font-size: 0.75rem;
   color: #6c757d;
+}
+
+.delete-conv-btn {
+  opacity: 0;
+  background: none;
+  border: none;
+  color: var(--color-gray-500);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.conversation-item:hover .delete-conv-btn {
+  opacity: 1;
+}
+
+.delete-conv-btn:hover {
+  background: var(--color-gray-200);
+  color: var(--color-primary);
 }
 
 .empty-state {
@@ -657,6 +766,46 @@ const handleFileUpload = (event) => {
 .header-actions {
   display: flex;
   gap: 0.75rem;
+  align-items: center;
+}
+
+.download-pdf-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(217, 0, 0, 0.2);
+}
+
+.download-pdf-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(217, 0, 0, 0.3);
+}
+
+.download-pdf-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.download-pdf-btn.downloading {
+  animation: pulse 1.5s infinite;
+}
+
+.download-pdf-btn .btn-text {
+  white-space: nowrap;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 .icon-btn {
@@ -672,9 +821,14 @@ const handleFileUpload = (event) => {
   color: var(--color-dark);
 }
 
-.icon-btn:hover {
+.icon-btn:hover:not(:disabled) {
   background: #e9ecef;
   transform: scale(1.1);
+}
+
+.icon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .status-banner {
@@ -782,6 +936,56 @@ const handleFileUpload = (event) => {
   background: white;
   color: #212529;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Markdown styling */
+.message-content :deep(h1),
+.message-content :deep(h2),
+.message-content :deep(h3) {
+  margin: 0.75rem 0 0.5rem 0;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.message-content :deep(h2) {
+  font-size: 1.125rem;
+  border-bottom: 2px solid var(--color-gray-200);
+  padding-bottom: 0.25rem;
+}
+
+.message-content :deep(p) {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.message-content :deep(ul),
+.message-content :deep(ol) {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.message-content :deep(li) {
+  margin: 0.25rem 0;
+  line-height: 1.6;
+}
+
+.message-content :deep(strong) {
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+.message-content :deep(hr) {
+  border: none;
+  border-top: 1px solid var(--color-gray-200);
+  margin: 1rem 0;
+}
+
+.message-content :deep(code) {
+  background: var(--color-gray-100);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-size: 0.875em;
+  font-family: 'Courier New', monospace;
 }
 
 .message-time {
@@ -1048,6 +1252,15 @@ const handleFileUpload = (event) => {
 
   .header-actions {
     gap: 0.5rem;
+  }
+
+  .download-pdf-btn .btn-text {
+    display: none;
+  }
+
+  .download-pdf-btn {
+    padding: 0.625rem;
+    min-width: 40px;
   }
 
   .icon-btn {

@@ -72,9 +72,18 @@ export const useChatStore = defineStore('chat', () => {
       const profileStore = useProfileStore()
       const appStore = useAppStore()
 
-      // Send message to backend with profile and language context
+      // Build conversation history (excluding the current message we just added)
+      const history = currentConversation.value.messages.slice(0, -1).map(msg => ({
+        role: msg.role,
+        content: msg.content,
+        timestamp: msg.timestamp
+      }))
+
+      // Send message to backend with conversation history, profile, and language
       const response = await chatAPI.sendMessage({
         message: messageContent,
+        history: history,
+        conversation_id: currentConversation.value.id,
         language: appStore.language || 'en',
         profile: profileStore.elderProfile || undefined
       })

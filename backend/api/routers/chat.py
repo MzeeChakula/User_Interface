@@ -20,6 +20,7 @@ router = APIRouter(
 
 from api.services.llm_service import get_llm_service
 from api.services.meal_plan_service import get_meal_plan_service
+from api.services.sunbird import sunbird_service
 from api.main import model_loader
 import json
 import re
@@ -152,17 +153,45 @@ Be warm, brief, and GET THINGS DONE."""}
             # 4. Call Groq API via LLM Service (using LangChain)
             response_content = await llm_service.generate_response(messages)
 
-        # 5. Save Assistant Response
+        # 5. Translate response if needed
+        final_response = response_content
+        if request.language and request.language != 'en':
+            try:
+                # Map language codes
+                lang_code_map = {'lg': 'lug', 'sw': 'swh', 'en': 'eng'}
+                target_lang = lang_code_map.get(request.language, request.language)
+
+                translation = await sunbird_service.translate(
+                    text=response_content,
+                    source_lang='eng',
+                    target_lang=target_lang
+                )
+
+                # Ensure we get a string result
+                translated_text = translation.get('translated_text', response_content)
+                if isinstance(translated_text, str):
+                    final_response = translated_text
+                else:
+                    import logging
+                    logging.warning(f"Translation returned non-string: {type(translated_text)}")
+                    final_response = response_content
+            except Exception as e:
+                # If translation fails, return original response
+                import logging
+                logging.warning(f"Translation failed: {str(e)}")
+                final_response = response_content
+
+        # 6. Save Assistant Response (save original English for consistency)
         assistant_msg = MessageDB(
             conversation_id=conversation_id,
             role="assistant",
-            content=response_content
+            content=response_content  # Save English version
         )
         db.add(assistant_msg)
         db.commit()
 
         return ChatResponse(
-            response=response_content,
+            response=final_response,  # Return translated version to user
             conversation_id=conversation_id,
             timestamp=datetime.now().isoformat()
         )

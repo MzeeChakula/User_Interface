@@ -18,6 +18,8 @@ class ChatRequest(BaseModel):
     message: str = Field(..., description="User message")
     history: List[ChatMessage] = Field(default=[], description="Conversation history")
     conversation_id: Optional[str] = Field(None, description="Conversation ID")
+    language: Optional[str] = Field("en", description="Preferred language code (en, lg, sw)")
+    profile: Optional[dict] = Field(None, description="User profile data for context")
 
 class ChatResponse(BaseModel):
     """Chat response schema"""

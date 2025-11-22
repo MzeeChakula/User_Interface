@@ -1,11 +1,14 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, UploadFile, File
 from api.models.ai import (
-    TranslateRequest, TranslateResponse, 
+    TranslateRequest, TranslateResponse,
     LanguageDetectRequest, LanguageDetectResponse,
     RAGQuery, RAGResponse
 )
 from api.services.sunbird import sunbird_service
 from api.services.rag_service import get_rag_service
+import PyPDF2
+from io import BytesIO
+import docx
 
 router = APIRouter(
     prefix="/ai",
