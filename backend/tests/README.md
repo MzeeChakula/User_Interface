@@ -12,7 +12,10 @@ tests/
 ├── test_predict.py       # Prediction endpoint tests
 ├── test_chat.py          # Chat endpoint tests
 ├── test_ai.py            # AI service tests (translation, RAG)
-└── test_model_loader.py  # ML model loader tests
+├── test_model_loader.py  # ML model loader tests
+├── test_food.py          # Food database CRUD and search tests
+├── test_meal_plan.py     # Meal plan generation tests
+└── test_voice.py         # Voice transcription and translation tests
 ```
 
 ## Running Tests
@@ -88,17 +91,17 @@ Environment variables are set automatically in `conftest.py`:
 ## Expected Behavior
 
 ### Tests That Should Pass
-- ✅ Health endpoint tests
-- ✅ Metrics endpoint tests
-- ✅ Model loader initialization
-- ✅ Authentication flow (if database is configured)
-- ✅ Prediction endpoint structure (even without models)
+- Health endpoint tests
+- Metrics endpoint tests
+- Model loader initialization
+- Authentication flow (if database is configured)
+- Prediction endpoint structure (even without models)
 
 ### Tests That May Fail (Expected)
-- ⚠️ Chat tests (if GROQ_API_KEY not configured)
-- ⚠️ Translation tests (if SUNBIRD_API_KEY not configured)
-- ⚠️ RAG tests (if TAVILY_API_KEY not configured)
-- ⚠️ Model predictions (if model files not in backend/models/)
+- Chat tests (if GROQ_API_KEY not configured)
+- Translation tests (if SUNBIRD_API_KEY not configured)
+- RAG tests (if TAVILY_API_KEY not configured)
+- Model predictions (if model files not in backend/models/)
 
 **These failures are normal** and won't affect deployment as long as:
 - The endpoints exist

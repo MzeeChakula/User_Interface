@@ -85,16 +85,29 @@ def sample_user_data():
 def sample_prediction_input():
     """Sample prediction input data"""
     return {
-        "age": 70,
-        "weight": 65.5,
-        "height": 165,
-        "gender": "male",
-        "activity_level": "sedentary"
+        "Energy_kcal_per_serving": 350,
+        "Protein_g_per_serving": 15,
+        "Fat_g_per_serving": 10,
+        "Carbohydrates_g_per_serving": 45,
+        "Fiber_g_per_serving": 5,
+        "Calcium_mg_per_serving": 200,
+        "Iron_mg_per_serving": 3,
+        "Zinc_mg_per_serving": 2,
+        "VitaminA_ug_per_serving": 500,
+        "VitaminC_mg_per_serving": 20,
+        "Potassium_mg_per_serving": 400,
+        "Magnesium_mg_per_serving": 50,
+        "region_encoded": 0,
+        "condition_encoded": 0,
+        "age_group_encoded": 1,
+        "season_encoded": 0,
+        "portion_size_g": 250,
+        "estimated_cost_ugx": 5000
     }
 
 
 @pytest.fixture
-def auth_token(client, sample_user_data):
+def auth_token(client, test_db, sample_user_data):
     """Get auth token for authenticated tests"""
     # Register user
     client.post("/auth/register", json=sample_user_data)
