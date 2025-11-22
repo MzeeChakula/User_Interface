@@ -173,10 +173,12 @@ class SunbirdService:
                 
                 response.raise_for_status()
                 result = response.json()
-                
-                # Parse response - Sunbird returns {"output": "translated text"}
+
+                # Parse response - Sunbird can return {"output": "..."} or {"text": "..."}
+                translated = result.get("output") or result.get("text") or text
+
                 return {
-                    "translated_text": result.get("output", text),
+                    "translated_text": translated,
                     "source_language": source_lang,
                     "target_language": target_lang,
                     "source_language_name": self.UGANDAN_LANGUAGES.get(source_lang, "Unknown"),

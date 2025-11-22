@@ -130,11 +130,13 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useOnlineStatus } from '../composables/useOnlineStatus'
+import { useModals } from '../composables/useModals'
 import { Smartphone, WifiOff } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const { isOnline } = useOnlineStatus()
+const { showAlert, showSuccess, showError, showInfo } = useModals()
 
 const isSignUp = ref(false)
 const loading = ref(false)
@@ -150,13 +152,17 @@ const handleResetPassword = async () => {
   resetLoading.value = true
   const result = await authStore.resetPassword(resetEmail.value)
   resetLoading.value = false
-  
+
   if (result.success) {
-    alert('If an account exists with this email, you will receive password reset instructions.')
+    await showAlert({
+      title: 'Reset Email Sent',
+      message: 'If an account exists with this email, you will receive password reset instructions.',
+      type: 'success'
+    })
     showResetModal.value = false
     resetEmail.value = ''
   } else {
-    alert(result.error || 'Failed to send reset email. Please try again.')
+    showError('Reset Failed', result.error || 'Failed to send reset email. Please try again.')
   }
 }
 
@@ -184,7 +190,7 @@ const handleEmailAuth = async () => {
   if (result.success) {
     if (isSignUp.value) {
       // Registration successful
-      alert('Account created successfully! Please sign in.')
+      await showSuccess('Account Created', 'Your account has been created successfully! Please sign in.')
       isSignUp.value = false
       // Keep email filled, clear password
       formData.value.password = ''
@@ -193,16 +199,22 @@ const handleEmailAuth = async () => {
       router.push({ name: 'Chat' })
     }
   } else {
-    alert(result.error || 'Authentication failed. Please try again.')
+    showError('Authentication Failed', result.error || 'Authentication failed. Please try again.')
   }
 }
 
-const handleGoogleAuth = () => {
-  alert('Google authentication will be implemented with backend integration.')
+const handleGoogleAuth = async () => {
+  await showInfo(
+    'Coming Soon',
+    'Google authentication will be available soon with backend integration.'
+  )
 }
 
-const handlePhoneAuth = () => {
-  alert('Phone authentication will be implemented with backend integration.')
+const handlePhoneAuth = async () => {
+  await showInfo(
+    'Coming Soon',
+    'Phone authentication will be available soon with backend integration.'
+  )
 }
 </script>
 

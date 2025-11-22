@@ -76,26 +76,18 @@ def test_food_recommendations_endpoint(client):
     """Test food recommendations endpoint"""
     response = client.get("/predict/recommend")
 
-    # Should respond
-    assert response.status_code in [200, 500]
-
-    if response.status_code == 200:
-        data = response.json()
-        # Should be a list or dict with recommendations
-        assert isinstance(data, (list, dict))
+    # Should return 400 because by_id or vector is required
+    assert response.status_code == 400
+    assert "by_id or vector" in response.json()["detail"].lower()
 
 
 @pytest.mark.unit
 def test_food_recommendations_with_params(client):
     """Test food recommendations with query parameters"""
-    params = {
-        "dietary_preference": "vegetarian",
-        "max_results": 5
-    }
+    # Provide by_id parameter as required
+    response = client.get("/predict/recommend?by_id=test_food_123&top_k=5")
 
-    response = client.get("/predict/recommend", params=params)
-
-    # Should respond
+    # Should respond (may fail if ensemble not loaded, but won't be 400)
     assert response.status_code in [200, 500]
 
 

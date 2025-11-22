@@ -1,11 +1,14 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, UploadFile, File
 from api.models.ai import (
-    TranslateRequest, TranslateResponse, 
+    TranslateRequest, TranslateResponse,
     LanguageDetectRequest, LanguageDetectResponse,
     RAGQuery, RAGResponse
 )
 from api.services.sunbird import sunbird_service
 from api.services.rag_service import get_rag_service
+import PyPDF2
+from io import BytesIO
+import docx
 
 router = APIRouter(
     prefix="/ai",
@@ -90,15 +93,89 @@ async def rag_query(query: RAGQuery):
             chat_history=query.chat_history,
             use_search=query.use_search
         )
-        
+
         return RAGResponse(
             answer=result["answer"],
             sources=result["sources"]
         )
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"RAG query failed: {str(e)}"
+        )
+
+@router.post("/rag/upload")
+async def upload_document(file: UploadFile = File(...)):
+    """
+    Upload a document (PDF, DOCX, TXT) for RAG processing.
+    The document will be processed and added to the knowledge base.
+    """
+    try:
+        # Validate file type
+        allowed_extensions = {'.pdf', '.docx', '.doc', '.txt'}
+        file_ext = '.' + file.filename.split('.')[-1].lower()
+
+        if file_ext not in allowed_extensions:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"File type {file_ext} not supported. Allowed types: {', '.join(allowed_extensions)}"
+            )
+
+        # Read file content
+        content = await file.read()
+
+        # Extract text based on file type
+        text_content = ""
+
+        if file_ext == '.pdf':
+            # Extract text from PDF
+            pdf_file = BytesIO(content)
+            pdf_reader = PyPDF2.PdfReader(pdf_file)
+            for page in pdf_reader.pages:
+                text_content += page.extract_text() + "\n"
+
+        elif file_ext in ['.docx', '.doc']:
+            # Extract text from DOCX
+            doc_file = BytesIO(content)
+            doc = docx.Document(doc_file)
+            for paragraph in doc.paragraphs:
+                text_content += paragraph.text + "\n"
+
+        elif file_ext == '.txt':
+            # Read text file
+            text_content = content.decode('utf-8')
+
+        if not text_content.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No text content found in the document"
+            )
+
+        # Get RAG service and add document to vector store
+        rag_service = get_rag_service()
+
+        # Split text into chunks (simple chunking by paragraphs)
+        chunks = [chunk.strip() for chunk in text_content.split('\n\n') if chunk.strip()]
+
+        # Create metadata for each chunk
+        metadata = [{"source": file.filename, "chunk_index": i} for i in range(len(chunks))]
+
+        # Add to vector store
+        await rag_service.add_documents(texts=chunks, metadatas=metadata)
+
+        return {
+            "message": "Document uploaded and processed successfully",
+            "filename": file.filename,
+            "chunks_added": len(chunks),
+            "text_length": len(text_content)
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to process document: {str(e)}"
         )
 

@@ -38,5 +38,29 @@ export const aiAPI = {
   async ragQuery(data) {
     const response = await apiClient.post('/ai/rag', data)
     return response.data
+  },
+
+  /**
+   * Upload document for RAG processing
+   * @param {File} file - Document file to upload
+   * @param {Function} onUploadProgress - Progress callback
+   * @returns {Promise}
+   */
+  async uploadDocument(file, onUploadProgress) {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const response = await apiClient.post('/ai/rag/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
+      onUploadProgress: (progressEvent) => {
+        if (onUploadProgress) {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          onUploadProgress(percentCompleted)
+        }
+      }
+    })
+    return response.data
   }
 }

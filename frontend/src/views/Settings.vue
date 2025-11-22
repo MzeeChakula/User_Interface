@@ -169,6 +169,7 @@ import { useAppStore } from '../stores/app'
 import { useAuthStore } from '../stores/auth'
 import { useChatStore } from '../stores/chat'
 import { useOnlineStatus } from '../composables/useOnlineStatus'
+import { useModals } from '../composables/useModals'
 import { Circle, HelpCircle, MessageCircle, LogOut, Trash2, Eraser, MessageSquare, Phone } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -176,6 +177,7 @@ const appStore = useAppStore()
 const authStore = useAuthStore()
 const chatStore = useChatStore()
 const { isOnline } = useOnlineStatus()
+const { showAlert, showConfirm, showSuccess, showInfo } = useModals()
 
 const showDeleteModal = ref(false)
 const deleteConfirmText = ref('')
@@ -194,8 +196,11 @@ const goBack = () => {
   router.push({ name: 'Chat' })
 }
 
-const changeLanguage = () => {
-  alert('Language change will be implemented with i18n integration.')
+const changeLanguage = async () => {
+  await showInfo(
+    'Coming Soon',
+    'Multi-language support will be available soon with i18n integration.'
+  )
 }
 
 const goToFAQ = () => {
@@ -210,10 +215,19 @@ const goToFeedback = () => {
   router.push({ name: 'SendFeedback' })
 }
 
-const logout = () => {
-  if (confirm('Are you sure you want to log out?')) {
+const logout = async () => {
+  const confirmed = await showConfirm({
+    title: 'Confirm Logout',
+    message: 'Are you sure you want to log out of your account?',
+    type: 'warning',
+    confirmText: 'Logout',
+    cancelText: 'Stay Logged In'
+  })
+
+  if (confirmed) {
     authStore.logout()
     router.push({ name: 'Auth' })
+    showSuccess('Logged Out', 'You have been successfully logged out')
   }
 }
 
@@ -221,11 +235,15 @@ const deleteAccount = () => {
   showDeleteModal.value = true
 }
 
-const confirmDeleteAccount = () => {
+const confirmDeleteAccount = async () => {
   authStore.logout()
   localStorage.clear()
   router.push({ name: 'Auth' })
-  alert('Your account has been deleted.')
+  await showAlert({
+    title: 'Account Deleted',
+    message: 'Your account has been permanently deleted.',
+    type: 'success'
+  })
 }
 
 const closeDeleteModal = () => {
@@ -233,8 +251,16 @@ const closeDeleteModal = () => {
   deleteConfirmText.value = ''
 }
 
-const clearCache = () => {
-  if (confirm('Are you sure you want to clear the cache?')) {
+const clearCache = async () => {
+  const confirmed = await showConfirm({
+    title: 'Clear Cache',
+    message: 'Are you sure you want to clear the cache? Your login session will be preserved.',
+    type: 'warning',
+    confirmText: 'Clear Cache',
+    cancelText: 'Cancel'
+  })
+
+  if (confirmed) {
     const authToken = localStorage.getItem('auth_token')
     const hasSeenIntro = localStorage.getItem('hasSeenIntro')
 
@@ -243,16 +269,24 @@ const clearCache = () => {
     if (authToken) localStorage.setItem('auth_token', authToken)
     if (hasSeenIntro) localStorage.setItem('hasSeenIntro', hasSeenIntro)
 
-    alert('Cache cleared successfully!')
+    showSuccess('Cache Cleared', 'Application cache has been cleared successfully')
   }
 }
 
-const clearConversations = () => {
-  if (confirm('Are you sure you want to delete all conversations? This cannot be undone.')) {
+const clearConversations = async () => {
+  const confirmed = await showConfirm({
+    title: 'Delete All Conversations',
+    message: 'Are you sure you want to delete all conversations? This action cannot be undone.',
+    type: 'danger',
+    confirmText: 'Delete All',
+    cancelText: 'Cancel'
+  })
+
+  if (confirmed) {
     chatStore.conversations = []
     chatStore.currentConversation = null
     chatStore.saveConversations()
-    alert('All conversations have been deleted.')
+    showSuccess('Conversations Deleted', 'All conversations have been permanently deleted')
   }
 }
 </script>
