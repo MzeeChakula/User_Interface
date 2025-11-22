@@ -55,7 +55,7 @@ app = FastAPI(
     contact={
         "name": "MzeeChakula Team",
         "url": "https://huggingface.co/Shakiran/MzeeChakulaNutritionEnsembleModel",
-        "backend": "https://mzeechakula-backend.onrender.com",
+        "backend": "https://mzeechakula-user-interface-backend.onrender.com",
         "email": "support@mzeechakula.com"
     },
     license_info={
@@ -67,7 +67,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://mzeechakula.vercel.app",
+        "https://mzeechakulaassistant.vercel.app",
         "http://localhost:5173",
         "http://localhost:5174",
         "http://localhost:3000",
@@ -81,7 +81,7 @@ app.add_middleware(
 )
 
 # Initialize model loader
-logger.info("Initializing MzeeChakula API...")
+logger.info("Initializing MzeeChakula AI Assistant API...")
 try:
     model_loader = ModelLoader()
     
