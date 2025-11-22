@@ -163,83 +163,131 @@ class ModelLoader:
             repo_path = _P(repo_dir)
 
             # Search for JSON embeddings or numpy arrays
-            embeddings_path = None
+            embedding_candidates = []
             metadata_path = None
+            
+            # Find all potential embedding files
+            # Prioritize JSON files as they often contain ID mappings
+            embedding_candidates.extend(sorted(list(repo_path.rglob('*embedd*.json'))))
+            embedding_candidates.extend(sorted(list(repo_path.rglob('*embedd*.npy'))))
+            
+            # Find metadata file
             for p in repo_path.rglob('*.json'):
                 name = p.name.lower()
-                if 'embedd' in name:
-                    embeddings_path = p
                 if 'meta' in name or 'items' in name or 'foods' in name:
                     metadata_path = p
+                    break
 
-            # Also accept .npy files
-            if embeddings_path is None:
-                for p in repo_path.rglob('*.npy'):
-                    if 'embedd' in p.name.lower():
-                        embeddings_path = p
-                        break
-
-            if embeddings_path is None:
+            if not embedding_candidates:
                 logger.warning("No embeddings file found in HF repo snapshot")
-            else:
-                # Load embeddings
+            
+            emb = None
+            ids = None
+            
+            # Try loading from candidates until successful
+            for embeddings_path in embedding_candidates:
                 try:
+                    logger.info(f"Attempting to load embeddings from: {embeddings_path.name}")
+                    
                     if embeddings_path.suffix == '.npy':
-                        emb = np.load(embeddings_path)
-                        ids = None
+                        # NPY loading
+                        data = np.load(embeddings_path, allow_pickle=True)
+                        raw_embeddings = data
+                        # For NPY, we might not have IDs unless they are in a separate file or part of the array
+                        # If data is object array, it might contain IDs? Assuming simple array for now
+                        raw_ids = [str(i) for i in range(len(data))]
                     else:
+                        # JSON loading
                         import json
                         with open(embeddings_path, 'r', encoding='utf-8') as ef:
                             data = json.load(ef)
-                        # data could be dict id->vector or list of {id:..., vector:...}
+                        
+                        raw_embeddings = []
+                        raw_ids = []
+                        
+                        # Normalize data structure
                         if isinstance(data, dict):
-                            ids = list(data.keys())
-                            emb = np.array(list(data.values()), dtype=float)
-                        elif isinstance(data, list) and len(data) and isinstance(data[0], dict):
-                            ids = [str(item.get('id') or item.get('food_id') or idx) for idx, item in enumerate(data)]
-                            emb = np.array([item.get('vector') or item.get('embedding') for item in data], dtype=float)
+                            raw_ids = list(data.keys())
+                            raw_embeddings = list(data.values())
+                        elif isinstance(data, list):
+                            if len(data) > 0 and isinstance(data[0], dict):
+                                # List of dicts
+                                for idx, item in enumerate(data):
+                                    raw_ids.append(str(item.get('id') or item.get('food_id') or idx))
+                                    raw_embeddings.append(item.get('vector') or item.get('embedding'))
+                            else:
+                                # List of lists/arrays
+                                raw_embeddings = data
+                                raw_ids = [str(i) for i in range(len(data))]
+                    
+                    # Validate and filter embeddings
+                    valid_embeddings = []
+                    valid_ids = []
+                    
+                    if len(raw_embeddings) > 0:
+                        # Determine expected dimension from the first valid non-empty vector
+                        expected_dim = 0
+                        for vec in raw_embeddings:
+                            if hasattr(vec, '__len__') and len(vec) > 0:
+                                expected_dim = len(vec)
+                                break
+                        
+                        if expected_dim > 0:
+                            for i, vec in enumerate(raw_embeddings):
+                                if hasattr(vec, '__len__') and len(vec) == expected_dim:
+                                    valid_embeddings.append(vec)
+                                    valid_ids.append(raw_ids[i])
+                        
+                        if valid_embeddings:
+                            emb = np.array(valid_embeddings, dtype=float)
+                            ids = valid_ids
+                            logger.info(f"Successfully loaded {len(emb)} valid embeddings from {embeddings_path.name}")
+                            break # Success!
                         else:
-                            emb = np.array(data, dtype=float)
-                            ids = None
-
-                    # Load metadata if present
-                    metadata = {}
-                    if metadata_path and metadata_path.exists():
-                        import json
-                        with open(metadata_path, 'r', encoding='utf-8') as mf:
-                            md = json.load(mf)
-                        # Expect dict id->info or list
-                        if isinstance(md, dict):
-                            metadata = md
-                        elif isinstance(md, list):
-                            # try to create mapping using id key
-                            for item in md:
-                                key = item.get('id') or item.get('food_id')
-                                if key is not None:
-                                    metadata[str(key)] = item
+                            logger.warning(f"No valid embeddings found in {embeddings_path.name}")
+                    else:
+                        logger.warning(f"Empty embeddings data in {embeddings_path.name}")
+                        
                 except Exception as e:
-                    logger.warning(f"Failed to load embeddings/metadata: {e}")
-                    emb = None
-                    ids = None
-                    metadata = {}
+                    logger.warning(f"Failed to load embeddings from {embeddings_path.name}: {e}")
+                    continue
 
-                if emb is not None:
-                    # normalize embeddings for cosine similarity
-                    norms = np.linalg.norm(emb, axis=1, keepdims=True)
-                    norms[norms == 0] = 1.0
-                    emb_norm = emb / norms
+            # Load metadata if present (shared across attempts)
+            metadata = {}
+            try:
+                if metadata_path and metadata_path.exists():
+                    import json
+                    with open(metadata_path, 'r', encoding='utf-8') as mf:
+                        md = json.load(mf)
+                    # Expect dict id->info or list
+                    if isinstance(md, dict):
+                        metadata = md
+                    elif isinstance(md, list):
+                        # try to create mapping using id key
+                        for item in md:
+                            key = item.get('id') or item.get('food_id')
+                            if key is not None:
+                                metadata[str(key)] = item
+            except Exception as e:
+                logger.warning(f"Failed to load metadata: {e}")
 
-                    self.models['ensemble'] = {
-                        'embeddings': emb_norm,
-                        'ids': ids,
-                        'metadata': metadata,
-                        'available': True,
-                        'repo_id': repo_id
-                    }
-                    logger.info(f"Loaded ensemble embeddings ({emb_norm.shape[0]} items)")
-                else:
-                    self.models['ensemble'] = {'available': False}
-                    logger.warning("Ensemble embeddings not available after download")
+            if emb is not None:
+                # normalize embeddings for cosine similarity
+                norms = np.linalg.norm(emb, axis=1, keepdims=True)
+                norms[norms == 0] = 1.0
+                emb_norm = emb / norms
+
+                self.models['ensemble'] = {
+                    'embeddings': emb_norm,
+                    'ids': ids,
+                    'metadata': metadata,
+                    'available': True,
+                    'repo_id': repo_id
+                }
+                logger.info(f"Finalized ensemble model with {emb_norm.shape[0]} items")
+            else:
+                self.models['ensemble'] = {'available': False}
+                logger.warning("Ensemble embeddings not available after trying all candidates")
 
             # Also try to load a model file inside the snapshot if present (xgboost pickle)
             try:
