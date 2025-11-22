@@ -64,6 +64,7 @@ openai
 # Document Processing
 PyPDF2
 python-docx
+reportlab
 
 # ================================
 # HTTP Client & Utilities

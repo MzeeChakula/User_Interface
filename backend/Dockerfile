@@ -38,6 +38,11 @@ COPY . .
 
 # Create non-root user
 RUN addgroup --system app && adduser --system --group app
+
+# Create cache directory for Hugging Face and set permissions
+RUN mkdir -p /app/cache && chown -R app:app /app/cache
+ENV HF_HOME=/app/cache
+
 USER app
 
 # Expose port
