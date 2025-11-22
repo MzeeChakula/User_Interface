@@ -13,6 +13,13 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
     error.value = null
     try {
+      // Call the registration API
+      await authAPI.register({
+        email: userData.email,
+        password: userData.password,
+        full_name: userData.full_name || userData.name || ''
+      })
+
       // Return success without logging in
       return { success: true }
     } catch (err) {

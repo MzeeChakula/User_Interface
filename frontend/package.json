@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/icons/logo.svg"
+    "generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/icons/logo.svg",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
@@ -25,6 +28,11 @@
   "devDependencies": {
     "@vite-pwa/assets-generator": "^1.0.2",
     "@vitejs/plugin-vue": "^6.0.1",
-    "vite": "^7.1.7"
+    "@vitest/ui": "^4.0.13",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^20.0.10",
+    "jsdom": "^27.2.0",
+    "vite": "^7.1.7",
+    "vitest": "^4.0.13"
   }
 }

@@ -161,8 +161,8 @@ async def upload_document(file: UploadFile = File(...)):
         # Create metadata for each chunk
         metadata = [{"source": file.filename, "chunk_index": i} for i in range(len(chunks))]
 
-        # Add to vector store
-        await rag_service.add_documents(texts=chunks, metadatas=metadata)
+        # Add to vector store (synchronous operation)
+        rag_service.add_documents(texts=chunks, metadatas=metadata)
 
         return {
             "message": "Document uploaded and processed successfully",

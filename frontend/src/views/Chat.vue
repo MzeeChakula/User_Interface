@@ -17,10 +17,14 @@
       <!-- Language Selector -->
       <div class="language-selector">
         <Globe :size="18" />
+        <span class="language-label">Language:</span>
         <select v-model="selectedLanguage" @change="changeLanguage" class="language-select">
-          <option value="en">English</option>
-          <option value="lg">Luganda</option>
-          <option value="sw">Swahili</option>
+          <option value="eng">English</option>
+          <option value="lug">Luganda</option>
+          <option value="nyn">Runyankole</option>
+          <option value="ach">Acholi</option>
+          <option value="teo">Ateso</option>
+          <option value="lgg">Lugbara</option>
         </select>
       </div>
 
@@ -401,9 +405,12 @@ const deleteConversation = async (conversationId) => {
 
 const changeLanguage = async () => {
   const langMap = {
-    'en': 'English',
-    'lg': 'Luganda',
-    'sw': 'Swahili'
+    'eng': 'English',
+    'lug': 'Luganda',
+    'nyn': 'Runyankole',
+    'ach': 'Acholi',
+    'teo': 'Ateso',
+    'lgg': 'Lugbara'
   }
 
   appStore.setLanguage(selectedLanguage.value)
@@ -625,6 +632,12 @@ const downloadMealPlan = async () => {
 
 .language-selector svg {
   color: var(--color-primary);
+}
+
+.language-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-dark);
 }
 
 .language-select {
