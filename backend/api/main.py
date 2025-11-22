@@ -4,18 +4,23 @@ from fastapi.responses import RedirectResponse
 import logging
 from pathlib import Path
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from .models.loader import ModelLoader
 from .routers import predict_router, health_router
 from .routers import predict, health
 from .routers.metrics import router as metrics_router
-from .models import database, user, chat
+from .models import database, user, chat, food
 
 # Create database tables
-# Order matters for foreign keys: User -> Conversation -> Message
+# Order matters for foreign keys: User -> Conversation -> Message, Food (independent)
 try:
     user.Base.metadata.create_all(bind=database.engine)
     chat.Base.metadata.create_all(bind=database.engine)
+    food.Base.metadata.create_all(bind=database.engine)
     logger = logging.getLogger(__name__)
     logger.info("Database tables created successfully")
 except Exception as e:
@@ -99,6 +104,8 @@ except Exception as e:
 from .routers.auth import router as auth_router
 from .routers.chat import router as chat_router
 from .routers.ai import router as ai_router
+from .routers.meal_plan import router as meal_plan_router
+from .routers.food import router as food_router
 
 # Include routers
 app.include_router(health_router)
@@ -107,6 +114,8 @@ app.include_router(metrics_router)
 app.include_router(auth_router)
 app.include_router(chat_router)
 app.include_router(ai_router)
+app.include_router(meal_plan_router)
+app.include_router(food_router)
 
 
 @app.get("/", include_in_schema=False)

@@ -6,6 +6,7 @@ from api.core.security import (
     create_access_token,
     get_password_hash,
     verify_password,
+    get_current_user,
     ACCESS_TOKEN_EXPIRE_MINUTES,
 )
 from sqlalchemy.orm import Session
@@ -109,6 +110,18 @@ async def login_for_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.get("/me", response_model=User)
+async def get_current_user_info(
+    current_user: UserDB = Depends(get_current_user)
+):
+    """
+    Get current user information
+
+    Returns the authenticated user's profile information.
+    Requires a valid JWT token in the Authorization header.
+    """
+    return current_user
 
 @router.post("/reset-password")
 async def reset_password(request: PasswordResetRequest, db: Session = Depends(get_db)):

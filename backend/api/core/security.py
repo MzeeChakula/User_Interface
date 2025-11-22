@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
-from typing import Optional, Union
+from typing import Optional, Union, Annotated
 from jose import JWTError, jwt
 import bcrypt
 from fastapi.security import OAuth2PasswordBearer
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Depends
+from sqlalchemy.orm import Session
+from api.models.database import get_db
 
 # Configuration
 SECRET_KEY = "YOUR_SECRET_KEY_HERE_PLEASE_CHANGE_IN_PRODUCTION"  # TODO: Move to env var
@@ -69,7 +71,47 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
-    
+
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+def get_current_user(
+    db: Session = Depends(get_db),
+    token: str = Depends(oauth2_scheme)
+):
+    """
+    Decode JWT token and return the current user
+
+    Args:
+        db: Database session
+        token: JWT access token
+
+    Returns:
+        UserDB: Current authenticated user
+
+    Raises:
+        HTTPException: If token is invalid or user not found
+    """
+    from api.models.user import UserDB, TokenData
+
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+        token_data = TokenData(email=email)
+    except JWTError:
+        raise credentials_exception
+
+    user = db.query(UserDB).filter(UserDB.email == token_data.email).first()
+    if user is None:
+        raise credentials_exception
+
+    return user
