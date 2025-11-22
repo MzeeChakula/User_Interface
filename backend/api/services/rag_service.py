@@ -109,7 +109,7 @@ Be friendly, informative, and focus on practical nutrition guidance."""),
             )
         return self._agent_executor
     
-    async def add_documents(self, texts: List[str], metadatas: Optional[List[Dict]] = None):
+    def add_documents(self, texts: List[str], metadatas: Optional[List[Dict]] = None):
         """
         Add documents to the vector store.
         

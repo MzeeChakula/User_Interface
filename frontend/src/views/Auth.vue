@@ -140,7 +140,9 @@ const { showAlert, showSuccess, showError, showInfo } = useModals()
 
 const isSignUp = ref(false)
 const loading = ref(false)
-
+const formData = ref({
+  name: '',
+  email: '',
   password: ''
 })
 

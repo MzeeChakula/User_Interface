@@ -19,9 +19,12 @@
             <div class="setting-description">Choose your preferred language</div>
           </div>
           <select v-model="appStore.language" @change="changeLanguage" class="setting-select">
-            <option value="en">English</option>
-            <option value="lg">Luganda</option>
-            <option value="sw">Swahili</option>
+            <option value="eng">English</option>
+            <option value="lug">Luganda</option>
+            <option value="nyn">Runyankole</option>
+            <option value="ach">Acholi</option>
+            <option value="teo">Ateso</option>
+            <option value="lgg">Lugbara</option>
           </select>
         </div>
       </section>
