@@ -45,7 +45,7 @@ joblib
 # AI Services
 # ================================
 # Hugging Face
-huggingface-hub
+huggingface-hub<1.0.0
 
 # LangChain & RAG
 langchain
