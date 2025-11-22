@@ -38,6 +38,10 @@ COPY . .
 
 # Create non-root user
 RUN addgroup --system app && adduser --system --group app
+
+# Create data directory for SQLite and give ownership to app user
+RUN mkdir -p /app/data && chown -R app:app /app/data
+
 USER app
 
 # Expose port
