@@ -39,8 +39,9 @@ COPY . .
 # Create non-root user
 RUN addgroup --system app && adduser --system --group app
 
-# Create data directory for SQLite and give ownership to app user
-RUN mkdir -p /app/data && chown -R app:app /app/data
+# Create cache directory for Hugging Face and data directory for SQLite
+RUN mkdir -p /app/cache /app/data && chown -R app:app /app/cache /app/data
+ENV HF_HOME=/app/cache
 
 USER app
 
