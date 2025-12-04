@@ -52,11 +52,26 @@ class RAGService:
     def vector_store(self):
         """Lazy load the vector store"""
         if self._vector_store is None:
-            self._vector_store = Chroma(
-                collection_name="mzeechakula_knowledge",
-                embedding_function=self.embeddings,
-                persist_directory="./chroma_db"
-            )
+            import os
+            # Use in-memory storage for production (Render), persistent for local
+            is_production = os.getenv("RENDER", "") or os.getenv("PRODUCTION", "")
+            
+            if is_production:
+                # In-memory mode for production (no persistent storage on Render)
+                import chromadb
+                client = chromadb.Client()
+                self._vector_store = Chroma(
+                    client=client,
+                    collection_name="mzeechakula_knowledge",
+                    embedding_function=self.embeddings
+                )
+            else:
+                # Persistent storage for local development
+                self._vector_store = Chroma(
+                    collection_name="mzeechakula_knowledge",
+                    embedding_function=self.embeddings,
+                    persist_directory="./chroma_db"
+                )
         return self._vector_store
 
     @property
