@@ -235,3 +235,61 @@ async def list_foods(
     """List all foods"""
     foods = db.query(FoodDB).offset(skip).limit(limit).all()
     return foods
+
+
+@router.get("/recommend")
+async def recommend_foods(
+    food_id: Optional[str] = None,
+    top_k: int = 10,
+    model_name: Optional[str] = None,
+    current_user: UserDB = Depends(get_current_user)
+):
+    """
+    Get food recommendations using ensemble ML models
+    
+    Args:
+        food_id: Optional food ID to get similar foods (if not provided, returns top recommendations)
+        top_k: Number of recommendations to return (default: 10)
+        model_name: Optional specific model to use (crgn_embeddings, gat_embeddings, hetgnn_embeddings)
+    
+    Returns:
+        List of recommended foods with similarity scores and contributing models
+    """
+    from api.main import model_loader
+    
+    try:
+        # Get recommendations from ensemble models
+        if food_id:
+            result = model_loader.recommend_foods(
+                by_id=food_id,
+                top_k=top_k,
+                model_name=model_name
+            )
+        else:
+            # Get top recommendations (you could use a default query vector here)
+            result = model_loader.recommend_foods(
+                top_k=top_k,
+                model_name=model_name
+            )
+        
+        if not result.get('success'):
+            raise HTTPException(
+                status_code=503,
+                detail=result.get('error', 'Recommendation service unavailable')
+            )
+        
+        return {
+            "success": True,
+            "recommendations": result.get('items', []),
+            "models_used": result.get('models_used', []),
+            "total": len(result.get('items', []))
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Recommendation failed: {str(e)}"
+        )
+

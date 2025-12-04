@@ -5,7 +5,6 @@ import os
 from typing import List, Dict, Optional
 from langchain_groq import ChatGroq
 from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langgraph.prebuilt import create_react_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -45,9 +44,8 @@ class RAGService:
     def embeddings(self):
         """Lazy load the embeddings model"""
         if self._embeddings is None:
-            self._embeddings = HuggingFaceEmbeddings(
-                model_name="sentence-transformers/all-MiniLM-L6-v2"
-            )
+            from api.services.simple_embeddings import SimpleEmbeddings
+            self._embeddings = SimpleEmbeddings()
         return self._embeddings
 
     @property

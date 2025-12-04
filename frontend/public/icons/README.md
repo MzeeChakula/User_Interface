@@ -20,7 +20,7 @@ The logo and PWA assets use the following color palette:
 
 ## Generated Assets
 
-### 📱 Icons
+### Icons
 
 | File | Size | Purpose | Platform |
 |------|------|---------|----------|

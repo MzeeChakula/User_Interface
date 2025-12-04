@@ -54,6 +54,7 @@ export const aiAPI = {
       headers: {
         'Content-Type': 'multipart/form-data'
       },
+      timeout: 120000, // 2 minutes for large file processing
       onUploadProgress: (progressEvent) => {
         if (onUploadProgress) {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)

@@ -84,7 +84,7 @@ export const useChatStore = defineStore('chat', () => {
         message: messageContent,
         history: history,
         conversation_id: currentConversation.value.id,
-        language: appStore.language || 'en',
+        language: appStore.language || 'eng',
         profile: profileStore.elderProfile || undefined
       })
 

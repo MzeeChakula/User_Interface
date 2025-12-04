@@ -1,0 +1,86 @@
+{
+    "app": {
+        "name": "Mzee Chakula",
+        "tagline": "Akitubor ko Ameda ka Ikaru Lu Uganda"
+    },
+    "nav": {
+        "newChat": "Elomun Epedori",
+        "settings": "Ebonokin",
+        "helpSupport": "Akwas",
+        "logout": "Apodoi"
+    },
+    "chat": {
+        "placeholder": "Acorit ewaasi...",
+        "send": "Alosit",
+        "listening": "Areresia...",
+        "voiceInput": "Elomun ko Akolong",
+        "uploadFile": "Atiasit Ewaraga",
+        "downloadPlan": "Aitiasit Eteker ko Ameda",
+        "readyForQuestions": "Akiboetai ka aigeta",
+        "uploadSuccess": "Ewaraga eakitiasai nges",
+        "uploadFailed": "Ewaraga ejamai aitiasa"
+    },
+    "settings": {
+        "title": "Ebonokin",
+        "language": "Aimomun",
+        "displayLanguage": "Aimomun Eriemunete",
+        "chooseLanguage": "Aiyaler aimomun inon",
+        "notifications": "Egetelat",
+        "pushNotifications": "Egetelat ko Ailosit",
+        "receiveReminders": "Aibonga aiboriosio ka aikipedorin",
+        "connection": "Abutikinete",
+        "networkStatus": "Etau ko Network",
+        "connected": "Ibutikinete ko internet",
+        "offline": "Ngol ibutikinete",
+        "appInfo": "Elat ko App",
+        "version": "Etau",
+        "storageUsed": "Aikiboi Akigaramisi",
+        "helpSupport": "Akwas",
+        "faq": "Aigeta Ma Akigetetor Lokaadang",
+        "contactUs": "Aikwetakinete Iteni",
+        "sendFeedback": "Ailosit Etunga Inon",
+        "logout": "Apodoi",
+        "confirmLogout": "Aikikais Apodoi",
+        "logoutMessage": "Ikori iteni kere aipodore?",
+        "stayLoggedIn": "Aigama ka Idiukai",
+        "languageUpdated": "Aimomun Akikasara",
+        "languageUpdatedMsg": "Aimomun inon akikasara."
+    },
+    "auth": {
+        "login": "Aidiuka",
+        "register": "Aicorita",
+        "email": "Email",
+        "password": "Ekorit Ewaraga",
+        "confirmPassword": "Aikikais Ekorit Ewaraga",
+        "fullName": "Ekai Epedori",
+        "forgotPassword": "Ijauni Ekorit Ewaraga?",
+        "noAccount": "Ngidi inae account?",
+        "hasAccount": "Inae account?",
+        "signUp": "Aicorita",
+        "signIn": "Aidiuka"
+    },
+    "common": {
+        "back": "Abu",
+        "cancel": "Aipodore",
+        "confirm": "Aikikais",
+        "save": "Aikiboi",
+        "delete": "Aibala",
+        "edit": "Aikasara",
+        "close": "Airika",
+        "yes": "Ee",
+        "no": "Mam",
+        "loading": "Aigeresia...",
+        "error": "Epedorit",
+        "success": "Nges"
+    },
+    "welcome": {
+        "title": "Yoga kon ka Mzee Chakula",
+        "subtitle": "Akituborit inon ko ameda ka ikaru lu Uganda",
+        "getStarted": "Aicakit",
+        "features": {
+            "mealPlans": "Eteker ko Ameda Akigeresi",
+            "localFoods": "Ameda ko Eturkanat",
+            "healthConditions": "Ameda ko Amunyar"
+        }
+    }
+}

@@ -1,0 +1,86 @@
+{
+    "app": {
+        "name": "Mzee Chakula",
+        "tagline": "Kony me Cam pa Jogi Madongo i Uganda"
+    },
+    "nav": {
+        "newChat": "Lok Manyen",
+        "settings": "Tic Ayera",
+        "helpSupport": "Kony",
+        "logout": "Woko"
+    },
+    "chat": {
+        "placeholder": "Coo lok mamegi...",
+        "send": "Cwali",
+        "listening": "Awinyo...",
+        "voiceInput": "Lok ki Dwon",
+        "uploadFile": "Ket Waraga",
+        "downloadPlan": "Gam Cik me Cam",
+        "readyForQuestions": "Ayub pi penyo",
+        "uploadSuccess": "Waraga oket maber",
+        "uploadFailed": "Waraga pe oket"
+    },
+    "settings": {
+        "title": "Tic Ayera",
+        "language": "Leb",
+        "displayLanguage": "Leb ma Nene",
+        "chooseLanguage": "Yer leb mamiti",
+        "notifications": "Lok",
+        "pushNotifications": "Lok me Cwalo",
+        "receiveReminders": "Nong cik ki tam",
+        "connection": "Kube",
+        "networkStatus": "Kit pa Network",
+        "connected": "Ikube ki internet",
+        "offline": "Pe ikube",
+        "appInfo": "Lok kom App",
+        "version": "Kit",
+        "storageUsed": "Kano ma Kitiyo Kwede",
+        "helpSupport": "Kony",
+        "faq": "Peny ma Kipeyo Tutwal",
+        "contactUs": "Tud Botwa",
+        "sendFeedback": "Cwali Tam mamegi",
+        "logout": "Woko",
+        "confirmLogout": "Moki Woko",
+        "logoutMessage": "Imoko ada ni icito woko?",
+        "stayLoggedIn": "Bed ka Idonyo",
+        "languageUpdated": "Leb Oloke",
+        "languageUpdatedMsg": "Leb mamegi oloke."
+    },
+    "auth": {
+        "login": "Donyi",
+        "register": "Cone",
+        "email": "Email",
+        "password": "Nyig Lem",
+        "confirmPassword": "Mok Nyig Lem",
+        "fullName": "Nyingi Weng",
+        "forgotPassword": "Wiye owil i Nyig Lem?",
+        "noAccount": "Pe inongo account?",
+        "hasAccount": "Dong inongo account?",
+        "signUp": "Cone",
+        "signIn": "Donyi"
+    },
+    "common": {
+        "back": "Dok Cen",
+        "cancel": "Juki",
+        "confirm": "Moki",
+        "save": "Gwoki",
+        "delete": "Kwanyi",
+        "edit": "Lok",
+        "close": "Lori",
+        "yes": "Ee",
+        "no": "Pe",
+        "loading": "Tiyo...",
+        "error": "Bal",
+        "success": "Ber"
+    },
+    "welcome": {
+        "title": "Ojoi i Mzee Chakula",
+        "subtitle": "Lakony me cam pa jogi madongo i Uganda",
+        "getStarted": "Caki",
+        "features": {
+            "mealPlans": "Cik me Cam ma Kiparo",
+            "localFoods": "Cam me Lokal",
+            "healthConditions": "Cam me Yotkom"
+        }
+    }
+}

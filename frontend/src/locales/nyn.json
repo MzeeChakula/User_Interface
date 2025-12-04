@@ -1,0 +1,86 @@
+{
+    "app": {
+        "name": "Mzee Chakula",
+        "tagline": "Obuhimbisi bw'Ebiribwa by'Abakuru mu Uganda"
+    },
+    "nav": {
+        "newChat": "Okushoma Okuhyaka",
+        "settings": "Eby'okutegura",
+        "helpSupport": "Obufasha",
+        "logout": "Okuva Ahari"
+    },
+    "chat": {
+        "placeholder": "Andika obubaazi bwawe...",
+        "send": "Tuma",
+        "listening": "Nkuterera...",
+        "voiceInput": "Okushoma n'Amaizi",
+        "uploadFile": "Oteera Ekiwandiko",
+        "downloadPlan": "Gira Copy y'Enteekateeka y'Ebiribwa",
+        "readyForQuestions": "Ndi ntegire okubabuuza",
+        "uploadSuccess": "Ekiwandiko kyaterwa kuhikire",
+        "uploadFailed": "Ekiwandiko tekiterwa"
+    },
+    "settings": {
+        "title": "Eby'okutegura",
+        "language": "Orurimi",
+        "displayLanguage": "Orurimi Orugambwa",
+        "chooseLanguage": "Shaba orurimi rwawe",
+        "notifications": "Obumenyezo",
+        "pushNotifications": "Obumenyezo bw'Okweyongyera",
+        "receiveReminders": "Okufuna ebyenjuka n'amagezi",
+        "connection": "Enkozesa",
+        "networkStatus": "Embeera y'Omutandagano",
+        "connected": "Orikwatana na internet",
+        "offline": "Oteine ku mutandagano",
+        "appInfo": "Ebikwata aha Purogulaamu",
+        "version": "Vaasiyo",
+        "storageUsed": "Okubiika Okuzikozisibwe",
+        "helpSupport": "Obufasha",
+        "faq": "Ebibuuzo Ebibuuzibwa Kunyima",
+        "contactUs": "Tutandare",
+        "sendFeedback": "Tuma Endowooza",
+        "logout": "Okuva Ahari",
+        "confirmLogout": "Kakasa Okuva Ahari",
+        "logoutMessage": "Orikugira ngu weesimbe okuva mu akawunti yawe?",
+        "stayLoggedIn": "Sigara Orikwingire",
+        "languageUpdated": "Orurimi Rwahinduka",
+        "languageUpdatedMsg": "Orurimi rwawe rwahinduka."
+    },
+    "auth": {
+        "login": "Yingira",
+        "register": "Yewandise",
+        "email": "Email",
+        "password": "Ekigambo Ekihisi",
+        "confirmPassword": "Kakasa Ekigambo Ekihisi",
+        "fullName": "Eizina Ryonna",
+        "forgotPassword": "Wairwireho Ekigambo Ekihisi?",
+        "noAccount": "Toine akawunti?",
+        "hasAccount": "Oine akawunti?",
+        "signUp": "Yewandise",
+        "signIn": "Yingira"
+    },
+    "common": {
+        "back": "Garuka",
+        "cancel": "Sazaho",
+        "confirm": "Kakasa",
+        "save": "Bika",
+        "delete": "Siba",
+        "edit": "Hindura",
+        "close": "Hinga",
+        "yes": "Ego",
+        "no": "Ngaha",
+        "loading": "Kurungi...",
+        "error": "Ensiobi",
+        "success": "Kiruhire"
+    },
+    "welcome": {
+        "title": "Tukushemereire aha Mzee Chakula",
+        "subtitle": "Omukozi wawe w'ebiribwa by'abakuru mu Uganda",
+        "getStarted": "Tandika",
+        "features": {
+            "mealPlans": "Enteekateeka y'Ebiribwa Eyetegerezewa",
+            "localFoods": "Ebiribwa by'Ensi yaitu",
+            "healthConditions": "Ebiribwa by'Amagara Marungi"
+        }
+    }
+}

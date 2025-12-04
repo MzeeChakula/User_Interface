@@ -173,8 +173,52 @@ class MealPlanService:
         conditions: List[str],
         preferred: List[str]
     ) -> List[str]:
-        """Get food recommendations based on health conditions"""
-        # Try database first
+        """Get food recommendations using ensemble ML models"""
+        
+        # Try to use ensemble models for recommendations
+        try:
+            ensemble = self.model_loader.models.get('ensemble', {})
+            
+            if ensemble.get('available'):
+                logger.info("Using ensemble models for food recommendations")
+                
+                # Create a query based on health conditions
+                # For now, we'll get general recommendations and filter by conditions
+                # You can enhance this by creating condition-specific query vectors
+                
+                # Get recommendations from the ensemble
+                recommendations = self.model_loader.recommend_foods(
+                    top_k=15  # Get more recommendations to filter
+                )
+                
+                if recommendations.get('success') and recommendations.get('items'):
+                    # Extract food IDs from recommendations
+                    recommended_foods = []
+                    
+                    for item in recommendations['items']:
+                        food_id = item.get('id', '')
+                        # Extract food name from ID (format: model_name_index)
+                        # We'll use the ID as-is for now, or extract from metadata
+                        if food_id:
+                            recommended_foods.append(food_id)
+                    
+                    # Add preferred foods
+                    for food in preferred:
+                        food_lower = food.lower().strip()
+                        if food_lower not in recommended_foods:
+                            recommended_foods.append(food_lower)
+                    
+                    logger.info(f"Got {len(recommended_foods)} recommendations from ensemble models")
+                    return recommended_foods[:8]
+                else:
+                    logger.warning("Ensemble recommendation failed, using fallback")
+            else:
+                logger.info("Ensemble models not available, using database/fallback")
+        
+        except Exception as e:
+            logger.error(f"Error using ensemble models for recommendations: {e}")
+        
+        # Fallback: Try database first
         db_foods = self._get_foods_from_db(conditions)
 
         if db_foods:
@@ -189,7 +233,7 @@ class MealPlanService:
 
             return recommended[:8]
 
-        # Fallback to hardcoded recommendations
+        # Final fallback to hardcoded recommendations
         recommended = []
 
         # Base recommendations for elderly

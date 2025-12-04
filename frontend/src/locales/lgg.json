@@ -1,0 +1,86 @@
+{
+    "app": {
+        "name": "Mzee Chakula",
+        "tagline": "'Yikoni ri Nyaka 'ba Okuni ri Uganda"
+    },
+    "nav": {
+        "newChat": "Ozuku Orinya",
+        "settings": "Efezu",
+        "helpSupport": "'Yikoni",
+        "logout": "Efisu"
+    },
+    "chat": {
+        "placeholder": "Ondri eri 'wani mi...",
+        "send": "Opisu",
+        "listening": "Ma eri...",
+        "voiceInput": "Ozuku 'bu Oko",
+        "uploadFile": "O'bo Ewaraga",
+        "downloadPlan": "O'du Epeleta ri Nyaka",
+        "readyForQuestions": "Ma sopia ri ndriza",
+        "uploadSuccess": "Ewaraga o'bo onyiru",
+        "uploadFailed": "Ewaraga oko'du ku"
+    },
+    "settings": {
+        "title": "Efezu",
+        "language": "Eli",
+        "displayLanguage": "Eli Ece Erini",
+        "chooseLanguage": "Onzu eli mi imbe",
+        "notifications": "Olezi",
+        "pushNotifications": "Olezi ri Osu",
+        "receiveReminders": "O'du onidriza pi amagezi",
+        "connection": "Okopi",
+        "networkStatus": "Eta ri Network",
+        "connected": "Mi okopi 'bu internet",
+        "offline": "Mi okopi ku",
+        "appInfo": "Eri Ekilikita ri App",
+        "version": "Eta",
+        "storageUsed": "Etilo Ecikozese",
+        "helpSupport": "'Yikoni",
+        "faq": "Ndriza Eci Ndrizarui Tra",
+        "contactUs": "Okopikoni",
+        "sendFeedback": "Opisu Ondruzu Mi",
+        "logout": "Efisu",
+        "confirmLogout": "Okikasa Efisu",
+        "logoutMessage": "Mi le ivu efisu niri?",
+        "stayLoggedIn": "Eru Enga Mi Dri",
+        "languageUpdated": "Eli Eyizu",
+        "languageUpdatedMsg": "Eli mi eyizu."
+    },
+    "auth": {
+        "login": "Odri",
+        "register": "Ondikaru",
+        "email": "Email",
+        "password": "Eyi 'Bisiri",
+        "confirmPassword": "Okikasa Eyi 'Bisiri",
+        "fullName": "Eri Drua",
+        "forgotPassword": "Oyiru'yi Eyi 'Bisiri?",
+        "noAccount": "Mi vini account ku?",
+        "hasAccount": "Mi vini account?",
+        "signUp": "Ondikaru",
+        "signIn": "Odri"
+    },
+    "common": {
+        "back": "Ogoku",
+        "cancel": "Ofi",
+        "confirm": "Okikasa",
+        "save": "Otilo",
+        "delete": "Oyi",
+        "edit": "Oyizu",
+        "close": "O'bi",
+        "yes": "Ee",
+        "no": "Ko",
+        "loading": "Ma kopi...",
+        "error": "Eza",
+        "success": "Onyiru"
+    },
+    "welcome": {
+        "title": "Omu O'dusi ri Mzee Chakula",
+        "subtitle": "'Yikoni mi ri nyaka ri okuni ri Uganda",
+        "getStarted": "Olimu",
+        "features": {
+            "mealPlans": "Epeleta ri Nyaka Ecozerini",
+            "localFoods": "Nyaka ri Enga",
+            "healthConditions": "Nyaka ri Alaru Onyi"
+        }
+    }
+}

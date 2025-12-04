@@ -1,0 +1,86 @@
+{
+    "app": {
+        "name": "Mzee Chakula",
+        "tagline": "Obuyambi bw'Emmere ey'Abakadde mu Uganda"
+    },
+    "nav": {
+        "newChat": "Okwogera Okupya",
+        "settings": "Entegeka",
+        "helpSupport": "Obuyambi",
+        "logout": "Okufuluma"
+    },
+    "chat": {
+        "placeholder": "Wandika obubaka bwo...",
+        "send": "Sindika",
+        "listening": "Mpulira...",
+        "voiceInput": "Okwogera",
+        "uploadFile": "Teeka Ekiwandiko",
+        "downloadPlan": "Kkopa Enteekateeka y'Emmere",
+        "readyForQuestions": "Nnetegese okuddamu ebibuuzo",
+        "uploadSuccess": "Ekiwandiko kiteekeddwa bulungi",
+        "uploadFailed": "Teekebwa kiwuddeko"
+    },
+    "settings": {
+        "title": "Entegeka",
+        "language": "Olulimi",
+        "displayLanguage": "Olulimi Olulabibwa",
+        "chooseLanguage": "Londa olulimi lw'oyagala",
+        "notifications": "Obumenyezo",
+        "pushNotifications": "Obumenyezo bw'Okusinziza",
+        "receiveReminders": "Okufuna obujjukizo n'amagezi",
+        "connection": "Enkolagana",
+        "networkStatus": "Embeera y'Omuyungiro",
+        "connected": "Oyunzidde ku mutimbagano",
+        "offline": "Toli ku mutimbagano",
+        "appInfo": "Ebikwata ku Purogulaamu",
+        "version": "Vaasiyo",
+        "storageUsed": "Ekubo Ekikozeseddwa",
+        "helpSupport": "Obuyambi",
+        "faq": "Ebibuuzo Ebibuuzibwa Ennyo",
+        "contactUs": "Tutuukirire",
+        "sendFeedback": "Sindika Endowooza",
+        "logout": "Okufuluma",
+        "confirmLogout": "Kakasa Okufuluma",
+        "logoutMessage": "Oli mwogezi okuva mu akawunti yo?",
+        "stayLoggedIn": "Sigala Nga Oyingidde",
+        "languageUpdated": "Olulimi Lukyusiddwa",
+        "languageUpdatedMsg": "Olulimi lwo lukyusiddwa."
+    },
+    "auth": {
+        "login": "Yingira",
+        "register": "Wewandiise",
+        "email": "Email",
+        "password": "Ekigambo Ekyama",
+        "confirmPassword": "Kakasa Ekigambo Ekyama",
+        "fullName": "Erinnya Lyonna",
+        "forgotPassword": "Weerabidde Ekigambo Ekyama?",
+        "noAccount": "Tolina akawunti?",
+        "hasAccount": "Olina akawunti dda?",
+        "signUp": "Wewandiise",
+        "signIn": "Yingira"
+    },
+    "common": {
+        "back": "Ddayo",
+        "cancel": "Sazaamu",
+        "confirm": "Kakasa",
+        "save": "Tereka",
+        "delete": "Sazaamu",
+        "edit": "Kyuusa",
+        "close": "Ggalawo",
+        "yes": "Yee",
+        "no": "Nedda",
+        "loading": "Etegekebwa...",
+        "error": "Ensobi",
+        "success": "Kiwedde Bulungi"
+    },
+    "welcome": {
+        "title": "Tukusanyuse ku Mzee Chakula",
+        "subtitle": "Atuyamba mu by'emmere ey'abakadde mu Uganda",
+        "getStarted": "Tandika",
+        "features": {
+            "mealPlans": "Enteekateeka y'Emmere Eyetegerezeddwa",
+            "localFoods": "Emmere y'Eggwanga",
+            "healthConditions": "Emmere Ennywevu"
+        }
+    }
+}

@@ -75,61 +75,114 @@ async def chat_message(
         db.add(user_msg)
         db.commit()
 
-        # 3. Construct messages for LLM
+        # 3. Check user's profile status
+        profile = request.profile or {}
+        has_profile = bool(profile.get('name') and profile.get('ageRange'))
+        
+        # Build profile context for the AI
+        if has_profile:
+            profile_summary = f"""
+CURRENT USER PROFILE:
+- Elder's Name: {profile.get('name', 'Not set')}
+- Age Range: {profile.get('ageRange', 'Not set')}
+- Gender: {profile.get('gender', 'Not set')}
+- Health Conditions: {', '.join(profile.get('healthConditions', [])) or 'None specified'}
+- Medications: {', '.join(profile.get('medications', [])) or 'None specified'}
+- Dietary Preferences: {', '.join(profile.get('dietaryPreferences', [])) or 'None specified'}
+- Allergies: {', '.join(profile.get('allergies', [])) or 'None specified'}
+- Region: {profile.get('region', 'Not set')}
+
+The user has already set up their profile. Start by greeting them and summarizing the profile above.
+Then ask: "What would you like to do today? I can help with:
+- Generate a personalized meal plan
+- Answer nutrition questions
+- Suggest local food alternatives
+- Update your profile"
+"""
+        else:
+            profile_summary = """
+NO PROFILE SET UP YET.
+
+Start by welcoming the user and explain you'd like to learn about the elderly person they're caring for.
+Ask ONE question at a time in this order:
+1. First, ask for the elderly person's NAME only.
+2. Wait for response, then ask about their AGE RANGE (60-70, 70-80, 80+).
+3. Wait for response, then ask about any HEALTH CONDITIONS (diabetes, hypertension, heart issues, etc.)
+4. Wait for response, then ask about FOOD PREFERENCES (favorite Ugandan foods they enjoy)
+5. After collecting info, summarize what you learned and ask if it's correct.
+
+IMPORTANT: Ask ONLY ONE question per message. Be patient and conversational.
+"""
+
+        # Construct messages for LLM
         messages = [
-            {"role": "system", "content": """You are Mzee Chakula, a helpful nutritional assistant for elderly care in Uganda.
+            {"role": "system", "content": f"""You are Mzee Chakula, a warm and caring nutritional assistant for elderly care in Uganda.
 
-YOUR GOAL: Understand the caregiver's needs quickly and provide ACTIONABLE SOLUTIONS.
+{profile_summary}
 
-WHEN USER ASKS FOR MEAL PLANS:
-Generate immediately in this format:
+CONVERSATION RULES:
+1. Be warm, friendly, and patient - like a caring family member
+2. Ask ONE question at a time, never multiple questions in one message
+3. Listen to the user's response before moving to the next question
+4. Use simple, clear language
+5. When ready to generate a meal plan, ask for confirmation first
+6. Use local Ugandan foods: matooke, beans, nakati, posho, cassava, sweet potatoes, groundnuts, millet, fish, sukuma wiki
 
-**7-Day Meal Plan for [Name/Condition]**
+WHEN USER CONFIRMS TO GENERATE MEAL PLAN (says "yes", "please", "go ahead", "ready", "generate"):
+Create a 7-day meal plan in this format:
+
+**7-Day Meal Plan for [Name]**
+**Daily Caloric Target:** ~[calories] kcal based on age and conditions
 
 **Monday:**
 - Breakfast: [Meal]
 - Lunch: [Meal]
 - Dinner: [Meal]
-
-**Tuesday:**
 [Continue for all 7 days...]
 
 **Shopping List:**
-- [Item 1]
-- [Item 2]
+[List of items needed]
 
-**Tips:**
-- [Brief tip 1]
-- [Brief tip 2]
+**Health Tips:**
+[3-4 relevant tips based on their conditions]
 
-CONVERSATION RULES:
-1. Ask MAX 2-3 questions to understand their needs (name, health conditions, food preferences)
-2. Once you have enough info → GENERATE THE MEAL PLAN immediately
-3. Don't keep asking questions in circles
-4. Be friendly but ACTION-ORIENTED
-5. Use local Ugandan foods: matooke, beans, nakati, posho, cassava, sweet potatoes, groundnuts
-
-RECOGNIZE THESE AS "GENERATE NOW" SIGNALS:
-- "make a meal plan"
-- "create meal plan"
-- "generate the plan"
-- "can we get the plan"
-- After collecting basic info (foods they like, any conditions)
-
-Be warm, brief, and GET THINGS DONE."""}
+Be conversational, ask one thing at a time, and make the user feel comfortable!"""}
         ]
         
-        # Load history from DB if not provided in request, or trust request?
-        # Better to load from DB for consistency, but for now let's use request history + current message
-        # Actually, let's use the DB history for context if we want true persistence
-        # For simplicity in this step, we'll stick to the request history but append the new message
-        
+        # Load history
         for msg in request.history:
             messages.append({"role": msg.role, "content": msg.content})
             
         messages.append({"role": "user", "content": request.message})
         
-        # 4. Check if we should generate meal plan based on conversation
+        # 4. Search uploaded documents for relevant context
+        document_context = ""
+        try:
+            from api.services.rag_service import get_rag_service
+            rag_service = get_rag_service()
+            
+            # Search for relevant documents
+            search_results = await rag_service.search_knowledge_base(request.message, k=3)
+            
+            if search_results:
+                document_context = "\n\n---UPLOADED DOCUMENT CONTEXT---\n"
+                document_context += "The user has uploaded documents. Here are relevant excerpts:\n\n"
+                for i, result in enumerate(search_results, 1):
+                    source = result.get('metadata', {}).get('source', 'Unknown document')
+                    content = result.get('content', '')[:500]  # Limit content length
+                    document_context += f"[Document: {source}]\n{content}\n\n"
+                document_context += "---END DOCUMENT CONTEXT---\n"
+                document_context += "\nUse this document information to help answer the user's question. "
+                document_context += "If they ask about the document, summarize what you see and explain how it could be used for meal planning.\n"
+                
+                # Add document context to the last user message
+                messages[-1]["content"] = document_context + "\nUser question: " + request.message
+        except Exception as e:
+            # If RAG search fails, continue without document context
+            import logging
+            logging.warning(f"RAG search failed: {e}")
+        
+        # 5. Check if we should generate meal plan based on conversation
         should_generate_plan, extracted_info = _should_generate_meal_plan(messages)
 
         if should_generate_plan and extracted_info:
@@ -150,34 +203,38 @@ Be warm, brief, and GET THINGS DONE."""}
                 # Fallback to LLM
                 response_content = await llm_service.generate_response(messages)
         else:
-            # 4. Call Groq API via LLM Service (using LangChain)
+            # 5. Call Groq API via LLM Service (using LangChain)
             response_content = await llm_service.generate_response(messages)
 
-        # 5. Translate response if needed
+        # 6. Translate response if needed
         final_response = response_content
-        if request.language and request.language != 'en':
+        import logging
+        logging.info(f"Language requested: '{request.language}' (will translate: {request.language and request.language != 'eng'})")
+        
+        if request.language and request.language != 'eng':
             try:
                 # Map language codes
                 lang_code_map = {'lg': 'lug', 'sw': 'swh', 'en': 'eng'}
                 target_lang = lang_code_map.get(request.language, request.language)
+                logging.info(f"Translating to: {target_lang}")
 
                 translation = await sunbird_service.translate(
                     text=response_content,
                     source_lang='eng',
                     target_lang=target_lang
                 )
+                logging.info(f"Translation result: {translation}")
 
                 # Ensure we get a string result
                 translated_text = translation.get('translated_text', response_content)
                 if isinstance(translated_text, str):
                     final_response = translated_text
+                    logging.info(f"Using translated response")
                 else:
-                    import logging
                     logging.warning(f"Translation returned non-string: {type(translated_text)}")
                     final_response = response_content
             except Exception as e:
                 # If translation fails, return original response
-                import logging
                 logging.warning(f"Translation failed: {str(e)}")
                 final_response = response_content
 
@@ -206,18 +263,31 @@ Be warm, brief, and GET THINGS DONE."""}
 def _should_generate_meal_plan(messages: list) -> tuple[bool, dict]:
     """
     Determine if we should generate a meal plan based on conversation history
-
+    
+    Only triggers when user CONFIRMS they want the plan generated.
     Returns: (should_generate, extracted_info_dict)
     """
-    # Join all conversation text
-    conversation_text = " ".join([m.get("content", "") for m in messages]).lower()
-
-    # Check for meal plan triggers
-    triggers = ["make a meal plan", "create meal plan", "generate plan", "meal plan for", "create a plan"]
-    has_trigger = any(trigger in conversation_text for trigger in triggers)
-
-    if not has_trigger:
+    # Get the last user message
+    last_user_msg = ""
+    for msg in reversed(messages):
+        if msg.get("role") == "user":
+            last_user_msg = msg.get("content", "").lower()
+            break
+    
+    # Check for EXPLICIT confirmation in the LAST message only
+    confirmation_phrases = [
+        "yes", "go ahead", "generate now", "create it", "make it",
+        "please do", "yes please", "sure", "ready", "proceed",
+        "generate the plan", "create the plan", "make the plan"
+    ]
+    
+    has_confirmation = any(phrase in last_user_msg for phrase in confirmation_phrases)
+    
+    if not has_confirmation:
         return False, {}
+    
+    # Join all conversation text for info extraction
+    conversation_text = " ".join([m.get("content", "") for m in messages]).lower()
 
     # Extract information from conversation
     extracted = {
@@ -232,8 +302,10 @@ def _should_generate_meal_plan(messages: list) -> tuple[bool, dict]:
     if not age_match:
         age_match = re.search(r'age[:\s]*(\d+)', conversation_text)
     if not age_match:
-        age_match = re.search(r'he.*?(\d+)', conversation_text)
-    if age_match:
+        age_match = re.search(r'(\d+)\s*-\s*(\d+)', conversation_text)  # Age range like 70-80
+        if age_match:
+            extracted['age'] = (int(age_match.group(1)) + int(age_match.group(2))) // 2
+    if age_match and extracted['age'] is None:
         extracted['age'] = int(age_match.group(1))
 
     # Extract health conditions
@@ -251,14 +323,11 @@ def _should_generate_meal_plan(messages: list) -> tuple[bool, dict]:
             extracted['foods'].append(food.replace(' ', '_'))
 
     # Extract name if mentioned
-    name_match = re.search(r'(?:name|called|grandfather|grandpa|granda)(?:\s+is)?\s+([A-Z][a-z]+)', " ".join([m.get("content", "") for m in messages]))
+    name_match = re.search(r'(?:name|called|grandfather|grandpa|granny|grandmother)(?:\s+is)?\s+([A-Z][a-z]+)', " ".join([m.get("content", "") for m in messages]))
     if name_match:
         extracted['name'] = name_match.group(1)
 
-    # Check if we have minimum info to generate (at least age or conditions)
-    has_enough_info = extracted['age'] is not None or len(extracted['conditions']) > 0
-
-    return has_trigger and has_enough_info, extracted
+    return True, extracted
 
 
 def _format_meal_plan_response(result: dict) -> str:

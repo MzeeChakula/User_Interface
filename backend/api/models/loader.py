@@ -181,10 +181,12 @@ class ModelLoader:
             if not embedding_candidates:
                 logger.warning("No embeddings file found in HF repo snapshot")
             
-            emb = None
-            ids = None
+            # Load ALL embedding files and combine them
+            all_embeddings = []
+            all_ids = []
+            loaded_files = []
             
-            # Try loading from candidates until successful
+            # Try loading from ALL candidates
             for embeddings_path in embedding_candidates:
                 try:
                     logger.info(f"Attempting to load embeddings from: {embeddings_path.name}")
@@ -195,7 +197,7 @@ class ModelLoader:
                         raw_embeddings = data
                         # For NPY, we might not have IDs unless they are in a separate file or part of the array
                         # If data is object array, it might contain IDs? Assuming simple array for now
-                        raw_ids = [str(i) for i in range(len(data))]
+                        raw_ids = [f"{embeddings_path.stem}_{i}" for i in range(len(data))]
                     else:
                         # JSON loading
                         import json
@@ -213,12 +215,12 @@ class ModelLoader:
                             if len(data) > 0 and isinstance(data[0], dict):
                                 # List of dicts
                                 for idx, item in enumerate(data):
-                                    raw_ids.append(str(item.get('id') or item.get('food_id') or idx))
+                                    raw_ids.append(str(item.get('id') or item.get('food_id') or f"{embeddings_path.stem}_{idx}"))
                                     raw_embeddings.append(item.get('vector') or item.get('embedding'))
                             else:
                                 # List of lists/arrays
                                 raw_embeddings = data
-                                raw_ids = [str(i) for i in range(len(data))]
+                                raw_ids = [f"{embeddings_path.stem}_{i}" for i in range(len(data))]
                     
                     # Validate and filter embeddings
                     valid_embeddings = []
@@ -239,10 +241,11 @@ class ModelLoader:
                                     valid_ids.append(raw_ids[i])
                         
                         if valid_embeddings:
-                            emb = np.array(valid_embeddings, dtype=float)
-                            ids = valid_ids
-                            logger.info(f"Successfully loaded {len(emb)} valid embeddings from {embeddings_path.name}")
-                            break # Success!
+                            # Add to combined list
+                            all_embeddings.extend(valid_embeddings)
+                            all_ids.extend(valid_ids)
+                            loaded_files.append(embeddings_path.name)
+                            logger.info(f"Successfully loaded {len(valid_embeddings)} valid embeddings from {embeddings_path.name}")
                         else:
                             logger.warning(f"No valid embeddings found in {embeddings_path.name}")
                     else:
@@ -251,6 +254,73 @@ class ModelLoader:
                 except Exception as e:
                     logger.warning(f"Failed to load embeddings from {embeddings_path.name}: {e}")
                     continue
+            
+            # Convert combined embeddings to numpy array
+            # Handle different embedding dimensions by storing them as separate models
+            emb = None
+            ids = None
+            if all_embeddings:
+                # Group embeddings by dimension
+                dim_groups = {}
+                for i, embedding in enumerate(all_embeddings):
+                    dim = len(embedding)
+                    if dim not in dim_groups:
+                        dim_groups[dim] = {'embeddings': [], 'ids': [], 'files': set()}
+                    dim_groups[dim]['embeddings'].append(embedding)
+                    dim_groups[dim]['ids'].append(all_ids[i])
+                    # Extract filename from ID (format: filename_index)
+                    file_prefix = all_ids[i].rsplit('_', 1)[0] if '_' in all_ids[i] else 'unknown'
+                    dim_groups[dim]['files'].add(file_prefix)
+                
+                # Log dimension groups
+                for dim, group in dim_groups.items():
+                    files_str = ', '.join(sorted(group['files']))
+                    logger.info(f"Found {len(group['embeddings'])} embeddings with dimension {dim} from: {files_str}")
+                
+                # Store ALL dimension groups as separate sub-models
+                if dim_groups:
+                    # Create a multi-model ensemble structure
+                    ensemble_models = {}
+                    total_embeddings = 0
+                    
+                    for dim, group in dim_groups.items():
+                        emb_array = np.array(group['embeddings'], dtype=float)
+                        # Normalize embeddings for cosine similarity
+                        norms = np.linalg.norm(emb_array, axis=1, keepdims=True)
+                        norms[norms == 0] = 1.0
+                        emb_norm = emb_array / norms
+                        
+                        # Determine model name from files
+                        files = sorted(group['files'])
+                        model_name = files[0] if len(files) == 1 else f"{dim}D_combined"
+                        
+                        ensemble_models[model_name] = {
+                            'embeddings': emb_norm,
+                            'ids': group['ids'],
+                            'dimension': dim,
+                            'count': len(emb_norm)
+                        }
+                        total_embeddings += len(emb_norm)
+                        
+                        files_str = ', '.join(files)
+                        logger.info(f"Created sub-ensemble '{model_name}': {len(emb_norm)} items × {dim}D from {files_str}")
+                    
+                    # Store the multi-model ensemble
+                    self.models['ensemble'] = {
+                        'models': ensemble_models,
+                        'available': True,
+                        'repo_id': repo_id,
+                        'type': 'MultiModelEnsemble',
+                        'size': f'{total_embeddings} items across {len(ensemble_models)} models',
+                        'accuracy': f'Food recommendation via {len(ensemble_models)} embedding models'
+                    }
+                    logger.info(f"Finalized multi-model ensemble with {total_embeddings} total embeddings across {len(ensemble_models)} models")
+                    
+                    # For backward compatibility, also set emb to the largest group
+                    best_dim = max(dim_groups.keys(), key=lambda d: len(dim_groups[d]['embeddings']))
+                    best_group = dim_groups[best_dim]
+                    emb = np.array(best_group['embeddings'], dtype=float)
+                    ids = best_group['ids']
 
             # Load metadata if present (shared across attempts)
             metadata = {}
@@ -271,21 +341,9 @@ class ModelLoader:
             except Exception as e:
                 logger.warning(f"Failed to load metadata: {e}")
 
-            if emb is not None:
-                # normalize embeddings for cosine similarity
-                norms = np.linalg.norm(emb, axis=1, keepdims=True)
-                norms[norms == 0] = 1.0
-                emb_norm = emb / norms
-
-                self.models['ensemble'] = {
-                    'embeddings': emb_norm,
-                    'ids': ids,
-                    'metadata': metadata,
-                    'available': True,
-                    'repo_id': repo_id
-                }
-                logger.info(f"Finalized ensemble model with {emb_norm.shape[0]} items")
-            else:
+            # Ensemble model already created above with multi-model structure
+            # Only set to unavailable if no embeddings were loaded at all
+            if 'ensemble' not in self.models:
                 self.models['ensemble'] = {'available': False}
                 logger.warning("Ensemble embeddings not available after trying all candidates")
 
@@ -307,9 +365,19 @@ class ModelLoader:
                         break
             except Exception:
                 pass
-            # If we didn't load a huggingface model file, ensure a key exists
+            # If we didn't load a huggingface model file but have embeddings, mark as available
             if 'huggingface' not in self.models:
-                self.models['huggingface'] = {'available': False}
+                if emb is not None:
+                    # Embeddings loaded successfully, mark HF as available
+                    self.models['huggingface'] = {
+                        'available': True,
+                        'type': 'HuggingFace Embeddings',
+                        'size': f'{emb_norm.shape[0]} embeddings',
+                        'accuracy': 'Food recommendation model',
+                        'repo_id': repo_id
+                    }
+                else:
+                    self.models['huggingface'] = {'available': False}
         except Exception as e:
             logger.warning(f"Could not load Hugging Face model: {e}")
             self.models['huggingface'] = {'available': False}
@@ -393,46 +461,133 @@ class ModelLoader:
                 'status': 'error'
             }
     
-    def recommend_foods(self, query_vector=None, top_k: int = 5, by_id: str = None):
+    def recommend_foods(self, query_vector=None, top_k: int = 5, by_id: str = None, model_name: str = None):
         """Return top-k similar food items from the ensemble embeddings.
 
         Provide either `query_vector` (iterable) or `by_id` to look up an item in the loaded ids.
+        If model_name is specified, use only that model; otherwise combine results from all models.
         """
         ensemble = self.models.get('ensemble', {})
         if not ensemble.get('available'):
             return {'success': False, 'error': 'Ensemble embeddings not available', 'items': []}
 
-        emb = ensemble['embeddings']
-        ids = ensemble.get('ids')
-        metadata = ensemble.get('metadata', {})
-
-        try:
-            if by_id is not None:
-                if ids is None:
-                    return {'success': False, 'error': 'No ids available to look up by_id', 'items': []}
-                try:
-                    idx = ids.index(str(by_id))
-                except ValueError:
-                    return {'success': False, 'error': 'by_id not found', 'items': []}
-                q = emb[idx]
+        # Check if this is a multi-model ensemble
+        if 'models' in ensemble:
+            # Multi-model ensemble - combine results from all models
+            ensemble_models = ensemble['models']
+            
+            if model_name and model_name in ensemble_models:
+                # Use specific model only
+                models_to_use = {model_name: ensemble_models[model_name]}
             else:
-                q = np.array(query_vector, dtype=float)
-                q = q / (np.linalg.norm(q) or 1.0)
+                # Use all models
+                models_to_use = ensemble_models
+            
+            try:
+                all_results = {}  # {item_id: {'score': max_score, 'meta': meta, 'models': [model_names]}}
+                
+                for m_name, m_data in models_to_use.items():
+                    emb = m_data['embeddings']
+                    ids = m_data['ids']
+                    
+                    # Prepare query vector
+                    if by_id is not None:
+                        if ids is None:
+                            continue
+                        try:
+                            idx = ids.index(str(by_id))
+                        except ValueError:
+                            continue
+                        q = emb[idx]
+                    else:
+                        if query_vector is None:
+                            continue
+                        q = np.array(query_vector, dtype=float)
+                        # Pad or truncate query vector to match embedding dimension
+                        if len(q) != m_data['dimension']:
+                            if len(q) < m_data['dimension']:
+                                q = np.pad(q, (0, m_data['dimension'] - len(q)))
+                            else:
+                                q = q[:m_data['dimension']]
+                        q = q / (np.linalg.norm(q) or 1.0)
+                    
+                    # Cosine similarity with normalized embeddings -> dot product
+                    sims = emb.dot(q)
+                    top_idx = np.argsort(-sims)[:top_k * 2]  # Get more candidates for merging
+                    
+                    for i in top_idx:
+                        item_id = ids[i] if ids is not None else str(i)
+                        score = float(sims[i])
+                        
+                        if item_id in all_results:
+                            # Combine scores (take maximum or average)
+                            all_results[item_id]['score'] = max(all_results[item_id]['score'], score)
+                            all_results[item_id]['models'].append(m_name)
+                        else:
+                            all_results[item_id] = {
+                                'score': score,
+                                'meta': {},
+                                'models': [m_name]
+                            }
+                
+                # Sort by score and take top_k
+                sorted_items = sorted(all_results.items(), key=lambda x: x[1]['score'], reverse=True)[:top_k]
+                
+                items = []
+                for item_id, data in sorted_items:
+                    items.append({
+                        'id': item_id,
+                        'score': data['score'],
+                        'meta': data['meta'],
+                        'models': data['models']  # Which models contributed to this recommendation
+                    })
+                
+                return {
+                    'success': True,
+                    'items': items,
+                    'models_used': list(models_to_use.keys())
+                }
+                
+            except Exception as e:
+                logger.error(f"Multi-model recommendation failed: {e}")
+                return {'success': False, 'error': str(e), 'items': []}
+        
+        else:
+            # Legacy single-model ensemble
+            emb = ensemble.get('embeddings')
+            ids = ensemble.get('ids')
+            metadata = ensemble.get('metadata', {})
+            
+            if emb is None:
+                return {'success': False, 'error': 'No embeddings in ensemble', 'items': []}
 
-            # cosine similarity with normalized embeddings -> dot product
-            sims = emb.dot(q)
-            top_idx = np.argsort(-sims)[:top_k]
+            try:
+                if by_id is not None:
+                    if ids is None:
+                        return {'success': False, 'error': 'No ids available to look up by_id', 'items': []}
+                    try:
+                        idx = ids.index(str(by_id))
+                    except ValueError:
+                        return {'success': False, 'error': 'by_id not found', 'items': []}
+                    q = emb[idx]
+                else:
+                    q = np.array(query_vector, dtype=float)
+                    q = q / (np.linalg.norm(q) or 1.0)
 
-            items = []
-            for i in top_idx:
-                item_id = ids[i] if ids is not None else i
-                info = metadata.get(str(item_id), {})
-                items.append({'id': item_id, 'score': float(sims[i]), 'meta': info})
+                # cosine similarity with normalized embeddings -> dot product
+                sims = emb.dot(q)
+                top_idx = np.argsort(-sims)[:top_k]
 
-            return {'success': True, 'items': items}
-        except Exception as e:
-            logger.error(f"Recommendation failed: {e}")
-            return {'success': False, 'error': str(e), 'items': []}
+                items = []
+                for i in top_idx:
+                    item_id = ids[i] if ids is not None else i
+                    info = metadata.get(str(item_id), {})
+                    items.append({'id': item_id, 'score': float(sims[i]), 'meta': info})
+
+                return {'success': True, 'items': items}
+            except Exception as e:
+                logger.error(f"Recommendation failed: {e}")
+                return {'success': False, 'error': str(e), 'items': []}
     
     def get_available_models(self) -> Dict:
         """Get status of all models"""

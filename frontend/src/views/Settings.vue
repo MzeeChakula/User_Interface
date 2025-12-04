@@ -1,8 +1,8 @@
 <template>
   <div class="settings-container">
     <header class="settings-header">
-      <button @click="goBack" class="back-btn">← Back</button>
-      <h1 class="header-title">Settings</h1>
+      <button @click="goBack" class="back-btn">← {{ $t('common.back') }}</button>
+      <h1 class="header-title">{{ $t('settings.title') }}</h1>
       <div class="spacer"></div>
     </header>
 
@@ -12,11 +12,11 @@
         <div class="settings-column">
           <!-- Language Settings -->
           <section class="settings-section">
-        <h2 class="section-title">Language Preferences</h2>
+        <h2 class="section-title">{{ $t('settings.language') }}</h2>
         <div class="setting-item">
           <div class="setting-info">
-            <div class="setting-label">Display Language</div>
-            <div class="setting-description">Choose your preferred language</div>
+            <div class="setting-label">{{ $t('settings.displayLanguage') }}</div>
+            <div class="setting-description">{{ $t('settings.chooseLanguage') }}</div>
           </div>
           <select v-model="appStore.language" @change="changeLanguage" class="setting-select">
             <option value="eng">English</option>
@@ -31,11 +31,11 @@
 
       <!-- Notifications Settings -->
       <section class="settings-section">
-        <h2 class="section-title">Notifications</h2>
+        <h2 class="section-title">{{ $t('settings.notifications') }}</h2>
         <div class="setting-item">
           <div class="setting-info">
-            <div class="setting-label">Push Notifications</div>
-            <div class="setting-description">Receive reminders and tips</div>
+            <div class="setting-label">{{ $t('settings.pushNotifications') }}</div>
+            <div class="setting-description">{{ $t('settings.receiveReminders') }}</div>
           </div>
           <label class="toggle-switch">
             <input
@@ -168,6 +168,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAppStore } from '../stores/app'
 import { useAuthStore } from '../stores/auth'
 import { useChatStore } from '../stores/chat'
@@ -175,6 +176,7 @@ import { useOnlineStatus } from '../composables/useOnlineStatus'
 import { useModals } from '../composables/useModals'
 import { Circle, HelpCircle, MessageCircle, LogOut, Trash2, Eraser, MessageSquare, Phone } from 'lucide-vue-next'
 
+const { t: $t, locale } = useI18n()
 const router = useRouter()
 const appStore = useAppStore()
 const authStore = useAuthStore()
@@ -200,9 +202,26 @@ const goBack = () => {
 }
 
 const changeLanguage = async () => {
-  await showInfo(
-    'Coming Soon',
-    'Multi-language support will be available soon with i18n integration.'
+  // Save language preference to localStorage
+  localStorage.setItem('preferred_language', appStore.language)
+  
+  // Change the i18n locale
+  locale.value = appStore.language
+  
+  const languageNames = {
+    'eng': 'English',
+    'lug': 'Luganda',
+    'nyn': 'Runyankole',
+    'ach': 'Acholi',
+    'teo': 'Ateso',
+    'lgg': 'Lugbara'
+  }
+  
+  const selectedLang = languageNames[appStore.language] || appStore.language
+  
+  await showSuccess(
+    $t('settings.languageUpdated'),
+    $t('settings.languageUpdatedMsg') + ` (${selectedLang})`
   )
 }
 

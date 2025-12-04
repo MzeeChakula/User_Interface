@@ -1,0 +1,86 @@
+{
+    "app": {
+        "name": "Mzee Chakula",
+        "tagline": "AI-Powered Nutrition for Uganda's Elderly"
+    },
+    "nav": {
+        "newChat": "New Chat",
+        "settings": "Settings",
+        "helpSupport": "Help & Support",
+        "logout": "Logout"
+    },
+    "chat": {
+        "placeholder": "Type your message...",
+        "send": "Send",
+        "listening": "Listening...",
+        "voiceInput": "Voice Input",
+        "uploadFile": "Upload Document",
+        "downloadPlan": "Download Meal Plan",
+        "readyForQuestions": "Ready for questions",
+        "uploadSuccess": "Document uploaded successfully",
+        "uploadFailed": "Failed to upload document"
+    },
+    "settings": {
+        "title": "Settings",
+        "language": "Language Preferences",
+        "displayLanguage": "Display Language",
+        "chooseLanguage": "Choose your preferred language",
+        "notifications": "Notifications",
+        "pushNotifications": "Push Notifications",
+        "receiveReminders": "Receive reminders and tips",
+        "connection": "Connection",
+        "networkStatus": "Network Status",
+        "connected": "Connected to the internet",
+        "offline": "Offline mode",
+        "appInfo": "App Information",
+        "version": "Version",
+        "storageUsed": "Storage Used",
+        "helpSupport": "Help & Support",
+        "faq": "FAQ",
+        "contactUs": "Contact Us",
+        "sendFeedback": "Send Feedback",
+        "logout": "Logout",
+        "confirmLogout": "Confirm Logout",
+        "logoutMessage": "Are you sure you want to log out?",
+        "stayLoggedIn": "Stay Logged In",
+        "languageUpdated": "Language Updated",
+        "languageUpdatedMsg": "Your language preference has been updated."
+    },
+    "auth": {
+        "login": "Login",
+        "register": "Register",
+        "email": "Email",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "fullName": "Full Name",
+        "forgotPassword": "Forgot Password?",
+        "noAccount": "Don't have an account?",
+        "hasAccount": "Already have an account?",
+        "signUp": "Sign Up",
+        "signIn": "Sign In"
+    },
+    "common": {
+        "back": "Back",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "close": "Close",
+        "yes": "Yes",
+        "no": "No",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success"
+    },
+    "welcome": {
+        "title": "Welcome to Mzee Chakula",
+        "subtitle": "Your AI-powered nutrition assistant for elderly care in Uganda",
+        "getStarted": "Get Started",
+        "features": {
+            "mealPlans": "Personalized Meal Plans",
+            "localFoods": "Local Ugandan Foods",
+            "healthConditions": "Health-Conscious Nutrition"
+        }
+    }
+}

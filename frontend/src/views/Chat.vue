@@ -5,19 +5,19 @@
       <div class="sidebar-header">
         <div class="app-brand">
           <img src="/icons/logotransparent.svg" alt="Logo" class="brand-icon" />
-          <h2 class="sidebar-title">Mzee Chakula</h2>
+          <h2 class="sidebar-title">{{ $t('app.name') }}</h2>
         </div>
         <button @click="toggleSidebar" class="close-btn mobile-only"><X :size="24" /></button>
       </div>
 
       <button @click="startNewChat" class="new-chat-btn">
-        <Plus :size="20" /> New Chat
+        <Plus :size="20" /> {{ $t('nav.newChat') }}
       </button>
 
       <!-- Language Selector -->
       <div class="language-selector">
         <Globe :size="18" />
-        <span class="language-label">Language:</span>
+        <span class="language-label">{{ $t('settings.language') }}:</span>
         <select v-model="selectedLanguage" @change="changeLanguage" class="language-select">
           <option value="eng">English</option>
           <option value="lug">Luganda</option>
@@ -58,7 +58,7 @@
         <button @click="toggleHelpDropdown" class="help-header">
           <div class="help-header-content">
             <HelpCircle :size="18" />
-            <span>Help & Support</span>
+            <span>{{ $t('nav.helpSupport') }}</span>
           </div>
           <ChevronDown :size="18" :class="['chevron', { rotated: helpDropdownOpen }]" />
         </button>
@@ -66,15 +66,15 @@
           <div v-if="helpDropdownOpen" class="help-links">
             <router-link to="/faq" class="help-link" @click="sidebarOpen = false">
               <MessageSquare :size="16" />
-              <span>FAQ</span>
+              <span>{{ $t('settings.faq') }}</span>
             </router-link>
             <router-link to="/contact-us" class="help-link" @click="sidebarOpen = false">
               <Phone :size="16" />
-              <span>Contact Us</span>
+              <span>{{ $t('settings.contactUs') }}</span>
             </router-link>
             <router-link to="/send-feedback" class="help-link" @click="sidebarOpen = false">
               <Send :size="16" />
-              <span>Send Feedback</span>
+              <span>{{ $t('settings.sendFeedback') }}</span>
             </router-link>
           </div>
         </transition>
@@ -83,7 +83,7 @@
       <!-- Logout Button -->
       <button @click="handleLogout" class="logout-btn">
         <LogOut :size="20" />
-        <span>Logout</span>
+        <span>{{ $t('nav.logout') }}</span>
       </button>
     </aside>
 
@@ -95,7 +95,7 @@
         <div class="header-actions">
           <button @click="downloadMealPlan" class="download-pdf-btn" :disabled="isDownloading" :class="{ downloading: isDownloading }">
             <Download :size="20" />
-            <span class="btn-text">Download Meal Plan</span>
+            <span class="btn-text">{{ $t('chat.downloadPlan') }}</span>
           </button>
           <router-link to="/profile" class="icon-btn" title="Profile"><User :size="20" /></router-link>
           <router-link to="/settings" class="icon-btn" title="Settings"><Settings :size="20" /></router-link>
@@ -111,8 +111,8 @@
       <div class="messages-container" ref="messagesContainer">
         <div v-if="!chatStore.currentConversation || chatStore.currentConversation.messages.length === 0" class="welcome-section">
           <div class="welcome-icon"><Hand :size="64" /></div>
-          <h2 class="welcome-title">Welcome to Mzee Chakula</h2>
-          <p class="welcome-text">Ask me anything about nutritional planning for elderly care</p>
+          <h2 class="welcome-title">{{ $t('welcome.title') }}</h2>
+          <p class="welcome-text">{{ $t('welcome.subtitle') }}</p>
 
           <div class="prompt-suggestions">
             <button
@@ -139,7 +139,7 @@
             <div class="document-info">
               <div class="document-name">{{ message.fileName }}</div>
               <div class="document-size">{{ message.fileSize }}</div>
-              <div class="document-status">✓ Ready for questions</div>
+              <div class="document-status">✓ {{ $t('chat.readyForQuestions') }}</div>
             </div>
           </div>
           <div v-else class="message-content" v-html="formatMarkdown(message.content)"></div>
@@ -177,7 +177,7 @@
           <input
             v-model="messageInput"
             type="text"
-            placeholder="Type your message..."
+            :placeholder="$t('chat.placeholder')"
             class="message-input"
             :disabled="chatStore.isLoading"
           />
@@ -259,6 +259,7 @@
 <script setup>
 import { ref, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useChatStore } from '../stores/chat'
 import { useAuthStore } from '../stores/auth'
 import { useAppStore } from '../stores/app'
@@ -273,6 +274,7 @@ import {
 } from 'lucide-vue-next'
 import { marked } from 'marked'
 
+const { t: $t, locale } = useI18n()
 const router = useRouter()
 const chatStore = useChatStore()
 const authStore = useAuthStore()
@@ -305,6 +307,36 @@ const examplePrompts = [
 onMounted(() => {
   chatStore.loadConversations()
   profileStore.loadProfile()
+  
+  // Initialize speech recognition
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+  if (SpeechRecognition) {
+    speechSupported.value = true
+    recognition = new SpeechRecognition()
+    recognition.continuous = false
+    recognition.interimResults = true
+    recognition.lang = 'en-US'
+    
+    recognition.onresult = (event) => {
+      let transcript = ''
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript
+      }
+      messageInput.value = transcript
+    }
+    
+    recognition.onend = () => {
+      isRecording.value = false
+    }
+    
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error)
+      isRecording.value = false
+      if (event.error === 'not-allowed') {
+        showError('Microphone Access Denied', 'Please allow microphone access to use voice input.')
+      }
+    }
+  }
 })
 
 const toggleSidebar = () => {
@@ -413,13 +445,16 @@ const changeLanguage = async () => {
     'lgg': 'Lugbara'
   }
 
+  // Update app store and i18n locale
   appStore.setLanguage(selectedLanguage.value)
+  locale.value = selectedLanguage.value
+  localStorage.setItem('preferred_language', selectedLanguage.value)
 
-  // Show confirmation
+  // Show confirmation in the new language
   const languageName = langMap[selectedLanguage.value] || selectedLanguage.value
   await showSuccess(
-    'Language Updated',
-    `Your messages will now be processed in ${languageName}`
+    $t('settings.languageUpdated'),
+    `${$t('settings.languageUpdatedMsg')} (${languageName})`
   )
 }
 
@@ -432,20 +467,32 @@ const confirmLogout = () => {
   router.push({ name: 'Auth' })
 }
 
+// Speech Recognition setup
+let recognition = null
+const speechSupported = ref(false)
+
 const toggleVoiceInput = async () => {
+  if (!speechSupported.value) {
+    await showInfo(
+      'Voice Not Supported',
+      'Your browser does not support voice input. Please try Chrome or Edge.'
+    )
+    return
+  }
+  
   if (!isRecording.value) {
     // Start recording
-    isRecording.value = true
-    // TODO: Implement actual voice recording
-    await showInfo(
-      'Voice Input Coming Soon',
-      'Voice input feature will be available soon with speech recognition.'
-    )
-    setTimeout(() => {
-      isRecording.value = false
-    }, 3000)
+    try {
+      recognition.start()
+      isRecording.value = true
+      showSuccess('Listening...', 'Speak now. Click the mic button again to stop.')
+    } catch (err) {
+      console.error('Failed to start recognition:', err)
+      showError('Voice Error', 'Failed to start voice input. Please try again.')
+    }
   } else {
     // Stop recording
+    recognition.stop()
     isRecording.value = false
   }
 }
@@ -487,14 +534,28 @@ const handleFileUpload = async (event) => {
       scrollToBottom()
     } catch (error) {
       console.error('Upload failed:', error)
+      console.error('Error response:', error.response?.data)
+      console.error('Error status:', error.response?.status)
+
+      // Get the actual error message from backend
+      let errorMessage = `Failed to upload "${file.name}". Please try again.`
+      
+      if (error.response?.data?.detail) {
+        // Backend returned a specific error message
+        errorMessage = error.response.data.detail
+      } else if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+        errorMessage = `Upload timed out for "${file.name}". The file may be too large or complex to process.`
+      } else if (!error.response) {
+        errorMessage = `Network error while uploading "${file.name}". Please check your connection.`
+      }
 
       // Add error message to chat
-      const errorMessage = {
+      const errorMessage2 = {
         role: 'system',
-        content: `Failed to upload "${file.name}". Please try again.`,
+        content: errorMessage,
         type: 'error'
       }
-      chatStore.addMessage(errorMessage)
+      chatStore.addMessage(errorMessage2)
     } finally {
       isUploading.value = false
       uploadProgress.value = 0

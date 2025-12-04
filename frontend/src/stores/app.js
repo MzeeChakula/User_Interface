@@ -1,12 +1,17 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 export const useAppStore = defineStore('app', () => {
   const isFirstTime = ref(localStorage.getItem('hasSeenIntro') !== 'true')
-  const language = ref(localStorage.getItem('language') || 'en')
+  const language = ref(localStorage.getItem('preferred_language') || 'eng')
   const notifications = ref(localStorage.getItem('notifications') === 'true')
   const isOnline = ref(navigator.onLine)
   const showLoader = ref(false)
+
+  // Auto-save language when it changes
+  watch(language, (newLang) => {
+    localStorage.setItem('preferred_language', newLang)
+  })
 
   const setFirstTimeComplete = () => {
     isFirstTime.value = false
@@ -15,7 +20,7 @@ export const useAppStore = defineStore('app', () => {
 
   const setLanguage = (lang) => {
     language.value = lang
-    localStorage.setItem('language', lang)
+    localStorage.setItem('preferred_language', lang)
   }
 
   const toggleNotifications = () => {

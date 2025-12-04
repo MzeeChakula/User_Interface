@@ -129,11 +129,37 @@ async def upload_document(file: UploadFile = File(...)):
         text_content = ""
 
         if file_ext == '.pdf':
-            # Extract text from PDF
-            pdf_file = BytesIO(content)
-            pdf_reader = PyPDF2.PdfReader(pdf_file)
-            for page in pdf_reader.pages:
-                text_content += page.extract_text() + "\n"
+            # Extract text from PDF with better error handling
+            try:
+                pdf_file = BytesIO(content)
+                pdf_reader = PyPDF2.PdfReader(pdf_file)
+                
+                # Check if PDF is encrypted
+                if pdf_reader.is_encrypted:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="This PDF is encrypted/password-protected. Please upload an unencrypted version."
+                    )
+                
+                # Extract text from all pages
+                for page_num, page in enumerate(pdf_reader.pages):
+                    try:
+                        page_text = page.extract_text()
+                        if page_text:
+                            text_content += page_text + "\n"
+                    except Exception as page_error:
+                        # Log page extraction error but continue
+                        import logging
+                        logging.warning(f"Failed to extract text from page {page_num + 1}: {page_error}")
+                        continue
+                        
+            except HTTPException:
+                raise
+            except Exception as pdf_error:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Failed to parse PDF: {str(pdf_error)}. The file may be corrupted or use an unsupported format."
+                )
 
         elif file_ext in ['.docx', '.doc']:
             # Extract text from DOCX
@@ -149,7 +175,7 @@ async def upload_document(file: UploadFile = File(...)):
         if not text_content.strip():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No text content found in the document"
+                detail="No text content found in the document. The file may contain only images or be empty."
             )
 
         # Get RAG service and add document to vector store
@@ -174,8 +200,20 @@ async def upload_document(file: UploadFile = File(...)):
     except HTTPException:
         raise
     except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Document upload failed for {file.filename}: {type(e).__name__}: {str(e)}", exc_info=True)
+        
+        # Provide more specific error messages
+        error_msg = str(e)
+        if "PyPDF2" in str(type(e)) or "PDF" in str(e):
+            error_msg = f"Failed to parse PDF. The file may be corrupted, encrypted, or use an unsupported format. Error: {str(e)}"
+        elif "No text content" in str(e):
+            error_msg = "The document appears to be empty or contains only images. Please upload a document with text content."
+        elif "ChromaDB" in str(e) or "embedding" in str(e).lower():
+            error_msg = f"Failed to process document embeddings. This may be a temporary issue. Error: {str(e)}"
+        
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to process document: {str(e)}"
+            detail=error_msg
         )
-
